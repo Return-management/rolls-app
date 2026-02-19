@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Suivi des rolls</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Suivi des rolls</h1>
+
+  <div id="login">
+    <label>Utilisateur :</label>
+    <input type="text" id="userName" />
+    <button id="btnLogin">Se connecter</button>
+  </div>
+
+  <div id="app" style="display:none;">
+    <p>Connecté en tant que <span id="currentUser"></span></p>
+
+    <div class="bloc">
+      <label>Statut du roll :</label>
+      <select id="statut">
+        <option>Arrivé</option>
+        <option>En tri</option>
+        <option>En préparation</option>
+        <option>En attente</option>
+        <option>Expédié</option>
+      </select>
+    </div>
+
+    <div class="bloc">
+      <label>Scan code-barres :</label>
+      <input type="text" id="scan" autofocus />
+    </div>
+
+    <div class="bloc">
+      <button id="btnAlertes">Voir les alertes</button>
+      <button id="btnExport">Exporter CSV</button>
+    </div>
+
+    <div class="bloc">
+      <h2>Infos</h2>
+      <pre id="info"></pre>
+    </div>
+
+    <div class="bloc">
+      <h2>Historique du roll</h2>
+      <pre id="historique"></pre>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
