@@ -5,11 +5,16 @@
   <title>Suivi des rolls</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
+
+  <!-- HEADER -->
   <h1>Suivi des rolls</h1>
 
-  <!-- PAGE DE CONNEXION UNIQUE -->
+  <!-- PAGE DE CONNEXION -->
   <div id="login">
+    <h2>Connexion</h2>
+
     <label>Identifiant :</label>
     <input type="text" id="loginUser" />
 
@@ -23,67 +28,74 @@
 
   <!-- APPLICATION -->
   <div id="app" style="display:none;">
+
     <p>Connecté en tant que <span id="currentUser"></span></p>
 
+    <!-- NAVIGATION PRINCIPALE -->
     <div class="menu">
       <button id="btnPageScan">Scan</button>
       <button id="btnEmplacements">Emplacements</button>
-      <button id="btnHistorique">Historique complet</button>
+      <button id="btnHistorique">Historique</button>
       <button id="btnAdmin" style="display:none;">Administration</button>
     </div>
 
     <!-- PAGE SCAN -->
-    <div id="pageScan">
-      <div class="bloc">
-        <label>Statut du roll :</label>
-        <select id="statut">
-          <option>Arrivé</option>
-          <option>En tri</option>
-          <option>En préparation</option>
-          <option>En attente</option>
-          <option>Expédié</option>
-        </select>
-      </div>
+    <div id="pageScan" class="bloc">
+      <h2>Scan</h2>
 
-      <div class="bloc">
-        <label>Scan code-barres :</label>
-        <input type="text" id="scan" autofocus />
-      </div>
+      <label>Statut du roll :</label>
+      <select id="statut">
+        <option>Arrivé</option>
+        <option>En tri</option>
+        <option>En préparation</option>
+        <option>En attente</option>
+        <option>Expédié</option>
+      </select>
 
-      <div class="bloc">
+      <label>Scan code-barres :</label>
+      <input type="text" id="scan" autofocus />
+
+      <div class="menu">
         <button id="btnAlertes">Voir les alertes</button>
         <button id="btnExport">Exporter CSV</button>
       </div>
 
-      <div class="bloc">
-        <h2>Infos</h2>
-        <pre id="info"></pre>
-      </div>
+      <h3>Infos</h3>
+      <pre id="info"></pre>
 
-      <div class="bloc">
-        <h2>Historique du roll scanné</h2>
-        <pre id="historique"></pre>
-      </div>
+      <h3>Historique du roll scanné</h3>
+      <pre id="historique"></pre>
     </div>
 
     <!-- PAGE EMPLACEMENTS -->
-    <div id="pageEmplacements" style="display:none;">
+    <div id="pageEmplacements" class="bloc" style="display:none;">
       <h2>Emplacements</h2>
+
       <input type="text" id="scanRecherche" placeholder="Scanner un roll pour savoir où il est" />
+
       <h3>Liste des emplacements</h3>
       <pre id="listeEmplacements"></pre>
     </div>
 
     <!-- PAGE HISTORIQUE COMPLET -->
-    <div id="pageHistorique" style="display:none;">
+    <div id="pageHistorique" class="bloc" style="display:none;">
       <h2>Historique complet</h2>
+
       <input type="text" id="filtreHistorique" placeholder="Rechercher..." />
+
       <pre id="listeHistorique"></pre>
     </div>
 
-    <!-- PAGE ADMIN (PLUS DE LOGIN ICI) -->
-    <div id="pageAdmin" style="display:none;">
+    <!-- PAGE ADMIN -->
+    <div id="pageAdmin" class="bloc" style="display:none;">
       <h2>Administration</h2>
+
+      <!-- NAVIGATION INTERNE ADMIN -->
+      <div class="menu">
+        <button onclick="showScan()">Scan</button>
+        <button onclick="showEmplacements()">Emplacements</button>
+        <button onclick="showHistorique()">Historique</button>
+      </div>
 
       <h3>Ajouter un utilisateur</h3>
       <input type="text" id="newUser" placeholder="Nom utilisateur" />
@@ -95,6 +107,7 @@
 
       <pre id="adminInfo"></pre>
     </div>
+
   </div>
 
   <script src="app.js"></script>
