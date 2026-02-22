@@ -412,11 +412,23 @@ document.getElementById("btnSavePanel").addEventListener("click", enregistrerEmp
 async function enregistrerEmplacement() {
   let roll = document.getElementById("panelRoll").value.trim();
   const emplacement = document.getElementById("panelEmplacement").value.trim();
-  const statut = document.getElementById("panelStatut").value;
+  let statut = document.getElementById("panelStatut").value;
 
-  // 👉 Autoriser un emplacement sans roll
+  // 👉 Si le roll est vide → demander confirmation
   if (!roll) {
-    roll = "Libre";
+    const confirmEmpty = confirm(
+      "⚠ Aucun roll n'a été renseigné.\nVoulez-vous enregistrer l'emplacement sans roll ?"
+    );
+
+    if (!confirmEmpty) {
+      return; // ❌ Annulé par l'utilisateur
+    }
+
+    // 👉 Générer un roll automatique
+    roll = "Vide";
+
+    // 👉 Pas de statut si roll vide
+    statut = "";
   }
 
   let res = await fetch("/api/assign", {
@@ -457,9 +469,13 @@ async function enregistrerEmplacement() {
 
   if (data.success) {
     chargerEmplacements();
+
+    // Réinitialisation du formulaire
     document.getElementById("panelRoll").value = "";
     document.getElementById("panelEmplacement").value = "";
     document.getElementById("panelStatut").value = "Arrivé";
   }
 }
+
+
 
