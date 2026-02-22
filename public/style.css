@@ -1,146 +1,85 @@
-/* ------------------------------
-   STYLE GLOBAL
------------------------------- */
 body {
-  margin: 0;
-  padding: 0;
   font-family: Arial, sans-serif;
-  background: #eef1f5;
-  color: #333;
+  margin: 20px;
 }
 
-h1 {
-  text-align: center;
-  padding: 20px 0;
-  background: #1e88e5;
-  color: white;
-  margin: 0;
-  font-size: 28px;
-  letter-spacing: 1px;
-}
-
-h2 {
-  margin-top: 0;
-  color: #1e88e5;
-}
-
-/* ------------------------------
-   CONTAINERS
------------------------------- */
-#login, #app {
-  max-width: 900px;
-  margin: 20px auto;
-  padding: 20px;
-}
-
-/* ------------------------------
-   BOUTONS
------------------------------- */
-button {
-  background: #1e88e5;
-  color: white;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 15px;
-  transition: 0.2s;
-}
-
-button:hover {
-  background: #1565c0;
-}
-
-button:active {
-  transform: scale(0.97);
-}
-
-/* ------------------------------
-   INPUTS
------------------------------- */
-input, select {
+.table {
   width: 100%;
-  padding: 10px;
-  margin: 6px 0 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 15px;
-  background: white;
+  border-collapse: collapse;
+  margin-top: 15px;
 }
 
-/* ------------------------------
-   NAVIGATION
------------------------------- */
-.menu {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
+.table th, .table td {
+  border: 1px solid #ccc;
+  padding: 8px;
 }
 
 .menu button {
-  flex: 1;
+  margin-right: 10px;
 }
 
-/* ------------------------------
-   CARTES / BLOCS
------------------------------- */
-.bloc {
-  background: white;
+.searchBox {
+  margin: 15px 0;
+}
+
+.btnAdd {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.btnCancel {
+  background-color: #999;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+/* OVERLAY */
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  z-index: 9;
+}
+
+/* PANNEAU COULISSANT */
+#sidePanel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100%;
+  background: #fff;
+  box-shadow: -3px 0 8px rgba(0,0,0,0.3);
   padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: right 0.3s ease;
+  z-index: 10;
 }
 
-/* ------------------------------
-   LISTE UTILISATEURS
------------------------------- */
-.userLine {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #f7f9fc;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  border: 1px solid #e0e6ed;
+#sidePanel.open {
+  right: 0;
 }
 
-.userLine input {
-  width: 150px;
+#sidePanel input, #sidePanel select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
 }
 
-/* ------------------------------
-   PRE (AFFICHAGE TEXTE)
------------------------------- */
-pre {
-  background: #f7f9fc;
-  padding: 12px;
-  border-radius: 6px;
-  overflow-x: auto;
-  border: 1px solid #ddd;
-  font-size: 14px;
-}
-
-/* ------------------------------
-   RESPONSIVE
------------------------------- */
+/* MOBILE */
 @media (max-width: 600px) {
-  .menu {
-    flex-direction: column;
-  }
-
-  button {
+  #sidePanel {
     width: 100%;
-  }
-
-  .userLine {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .userLine input {
-    width: 100%;
+    right: -100%;
   }
 }
