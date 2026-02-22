@@ -181,7 +181,7 @@ async function traiterScan() {
    ASSIGNATION ROLL → EMPLACEMENT
 ============================================================ */
 async function assignerRoll(roll_id, emplacement) {
-  const statut = statut.value;
+  const statutValue = document.getElementById("statut").value;
 
   let res = await fetch("/api/assign", {
     method: "POST",
@@ -189,7 +189,7 @@ async function assignerRoll(roll_id, emplacement) {
     body: JSON.stringify({
       roll_id,
       emplacement,
-      statut,
+      statut: statutValue,
       userId,
       force: false
     })
@@ -211,7 +211,7 @@ async function assignerRoll(roll_id, emplacement) {
       body: JSON.stringify({
         roll_id,
         emplacement,
-        statut,
+        statut: statutValue,
         userId,
         force: true
       })
@@ -221,7 +221,7 @@ async function assignerRoll(roll_id, emplacement) {
   }
 
   if (data.success) {
-    ajouterScanTableau(roll_id, emplacement, statut);
+    ajouterScanTableau(roll_id, emplacement, statutValue);
     chargerEmplacements();
   }
 }
