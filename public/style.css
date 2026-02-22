@@ -130,3 +130,26 @@ pre {
   flex: 1;
   height: fit-content;
 }
+/* ------------------------------
+   LOGOS HEADER
+------------------------------ */
+#headerLogos {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1e88e5;
+  padding: 10px 20px;
+  color: white;
+}
+
+#headerLogos h1 {
+  margin: 0;
+  font-size: 28px;
+  color: white;
+}
+
+#headerLogos .logo {
+  height: 60px;
+  object-fit: contain;
+}
+
