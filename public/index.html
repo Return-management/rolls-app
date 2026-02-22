@@ -8,7 +8,6 @@
 
 <body>
 
-  <!-- HEADER -->
   <h1>Suivi des rolls</h1>
 
   <!-- PAGE DE CONNEXION -->
@@ -31,7 +30,6 @@
 
     <p>Connecté en tant que <span id="currentUser"></span></p>
 
-    <!-- NAVIGATION PRINCIPALE -->
     <div class="menu">
       <button id="btnPageScan">Scan</button>
       <button id="btnEmplacements">Emplacements</button>
@@ -55,13 +53,18 @@
       <label>Scan code-barres :</label>
       <input type="text" id="scan" autofocus />
 
-      <div class="menu">
-        <button id="btnAlertes">Voir les alertes</button>
-        <button id="btnExport">Exporter CSV</button>
-      </div>
-
-      <h3>Infos</h3>
-      <pre id="info"></pre>
+      <h3>Tableau des scans</h3>
+      <table id="tableScans" border="1" style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th>Roll</th>
+            <th>Emplacement</th>
+            <th>Statut</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
 
       <h3>Historique du roll scanné</h3>
       <pre id="historique"></pre>
@@ -71,7 +74,7 @@
     <div id="pageEmplacements" class="bloc" style="display:none;">
       <h2>Emplacements</h2>
 
-      <input type="text" id="scanRecherche" placeholder="Scanner un roll pour savoir où il est" />
+      <p>Dernier roll scanné : <b id="lastRoll"></b></p>
 
       <h3>Liste des emplacements</h3>
       <pre id="listeEmplacements"></pre>
@@ -80,9 +83,6 @@
     <!-- PAGE HISTORIQUE COMPLET -->
     <div id="pageHistorique" class="bloc" style="display:none;">
       <h2>Historique complet</h2>
-
-      <input type="text" id="filtreHistorique" placeholder="Rechercher..." />
-
       <pre id="listeHistorique"></pre>
     </div>
 
@@ -90,7 +90,6 @@
     <div id="pageAdmin" class="bloc" style="display:none;">
       <h2>Administration</h2>
 
-      <!-- NAVIGATION INTERNE ADMIN -->
       <div class="menu">
         <button onclick="showScan()">Scan</button>
         <button onclick="showEmplacements()">Emplacements</button>
@@ -104,6 +103,8 @@
 
       <h3>Liste des utilisateurs</h3>
       <div id="listeUsers"></div>
+
+      <button id="btnExportUsers">Exporter les mots de passe</button>
 
       <pre id="adminInfo"></pre>
     </div>
