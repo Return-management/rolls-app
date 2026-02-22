@@ -54,7 +54,7 @@ db.serialize(() => {
   );
 });
 
-// LOGIN sécurisé
+// LOGIN utilisateur
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
 
@@ -94,7 +94,7 @@ app.post("/api/scan", (req, res) => {
   });
 });
 
-// ASSIGNATION
+// ASSIGNATION / DÉPLACEMENT
 app.post("/api/assign", (req, res) => {
   const { roll_id, emplacement, statut, userId } = req.body;
 
@@ -122,7 +122,7 @@ app.get("/api/emplacements", (req, res) => {
   );
 });
 
-// RECHERCHE
+// RECHERCHE ROLL
 app.get("/api/recherche/:roll_id", (req, res) => {
   const roll_id = req.params.roll_id;
 
@@ -161,7 +161,7 @@ app.get("/api/alertes", (req, res) => {
   db.all(sql, [limite], (err, rows) => res.json({ alertes: rows }));
 });
 
-// EXPORT CSV
+// EXPORT HISTORIQUE CSV
 app.get("/api/export", (req, res) => {
   const sql = `
     SELECT h.date, h.roll_id, h.emplacement, h.statut, u.nom AS utilisateur, h.action
@@ -183,6 +183,20 @@ app.get("/api/export", (req, res) => {
   });
 });
 
+// ADMIN — LOGIN
+app.post("/api/admin/login", (req, res) => {
+  const { username, password } = req.body;
+
+  db.get(
+    "SELECT * FROM auth WHERE username = ? AND password = ?",
+    [username, password],
+    (err, row) => {
+      if (!row) return res.json({ success: false });
+      res.json({ success: true });
+    }
+  );
+});
+
 // ADMIN — LISTE UTILISATEURS
 app.get("/api/admin/listUsers", (req, res) => {
   db.all("SELECT id, username, password FROM auth ORDER BY username ASC", [], (err, rows) => {
@@ -190,7 +204,7 @@ app.get("/api/admin/listUsers", (req, res) => {
   });
 });
 
-// ADMIN — EXPORT USERS
+// ADMIN — EXPORT USERS (identifiants + mots de passe en clair)
 app.get("/api/admin/exportUsers", (req, res) => {
   db.all("SELECT username, password FROM auth ORDER BY username ASC", [], (err, rows) => {
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
@@ -205,7 +219,7 @@ app.get("/api/admin/exportUsers", (req, res) => {
   });
 });
 
-// ADMIN — SUPPRESSION
+// ADMIN — SUPPRIMER UTILISATEUR
 app.post("/api/admin/deleteUser", (req, res) => {
   const { id } = req.body;
 
@@ -228,4 +242,3 @@ app.post("/api/admin/updatePassword", (req, res) => {
 app.listen(PORT, () => {
   console.log("Serveur démarré sur le port " + PORT);
 });
-
