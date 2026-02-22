@@ -75,13 +75,10 @@ app.post("/api/login", (req, res) => {
 });
 
 // ------------------------------------------------------------
-// ADMIN : AJOUT UTILISATEUR
+// ADMIN
 // ------------------------------------------------------------
 app.post("/api/admin/addUser", (req, res) => {
   const { username, password } = req.body;
-
-  if (!username || !password)
-    return res.json({ success: false, error: "Données manquantes" });
 
   db.run(
     "INSERT INTO auth(username, password, isAdmin) VALUES (?, ?, 0)",
@@ -93,9 +90,6 @@ app.post("/api/admin/addUser", (req, res) => {
   );
 });
 
-// ------------------------------------------------------------
-// ADMIN : LISTE UTILISATEURS
-// ------------------------------------------------------------
 app.get("/api/admin/listUsers", (req, res) => {
   db.all("SELECT id, username, password, isAdmin FROM auth ORDER BY username ASC", [], (err, rows) => {
     if (err) return res.json({ success: false });
@@ -103,25 +97,15 @@ app.get("/api/admin/listUsers", (req, res) => {
   });
 });
 
-// ------------------------------------------------------------
-// ADMIN : SUPPRESSION UTILISATEUR
-// ------------------------------------------------------------
 app.post("/api/admin/deleteUser", (req, res) => {
-  const { id } = req.body;
-
-  db.run("DELETE FROM auth WHERE id = ?", [id], (err) => {
+  db.run("DELETE FROM auth WHERE id = ?", [req.body.id], (err) => {
     if (err) return res.json({ success: false });
     res.json({ success: true });
   });
 });
 
-// ------------------------------------------------------------
-// ADMIN : MODIFICATION MOT DE PASSE
-// ------------------------------------------------------------
 app.post("/api/admin/updatePassword", (req, res) => {
-  const { id, password } = req.body;
-
-  db.run("UPDATE auth SET password = ? WHERE id = ?", [password, id], (err) => {
+  db.run("UPDATE auth SET password = ? WHERE id = ?", [req.body.password, req.body.id], (err) => {
     if (err) return res.json({ success: false });
     res.json({ success: true });
   });
@@ -132,17 +116,13 @@ app.post("/api/admin/updatePassword", (req, res) => {
 // ------------------------------------------------------------
 app.post("/api/scan", (req, res) => {
   const { code } = req.body;
-  if (!code) return res.status(400).json({ error: "Code requis" });
 
   db.get("SELECT * FROM rolls WHERE roll_id = ?", [code], (err, roll) => {
-    if (err) return res.status(500).json({ error: "Erreur DB" });
-
     if (roll) {
       db.all(
         "SELECT date, emplacement, statut, action FROM historique WHERE roll_id = ? ORDER BY date ASC",
         [code],
         (err2, hist) => {
-          if (err2) return res.status(500).json({ error: "Erreur DB" });
           res.json({
             type: "existing_roll",
             roll,
@@ -166,25 +146,16 @@ app.post("/api/scan", (req, res) => {
 app.post("/api/assign", (req, res) => {
   const { roll_id, emplacement, statut, userId } = req.body;
 
-  if (!roll_id || !emplacement || !userId)
-    return res.status(400).json({ error: "Données manquantes" });
-
-  const finalStatut = statut || "Arrivé";
   const now = new Date().toISOString().replace("T", " ").substring(0, 19);
 
   db.run(
     "INSERT OR REPLACE INTO rolls(roll_id, emplacement, statut) VALUES (?,?,?)",
-    [roll_id, emplacement, finalStatut],
-    (err) => {
-      if (err) return res.status(500).json({ error: "Erreur DB" });
-
+    [roll_id, emplacement, statut],
+    () => {
       db.run(
         "INSERT INTO historique(date, roll_id, emplacement, statut, user_id, action) VALUES (?,?,?,?,?,?)",
-        [now, roll_id, emplacement, finalStatut, userId, "Déplacement"],
-        (err2) => {
-          if (err2) return res.status(500).json({ error: "Erreur DB" });
-          res.json({ success: true });
-        }
+        [now, roll_id, emplacement, statut, userId, "Déplacement"],
+        () => res.json({ success: true })
       );
     }
   );
@@ -194,56 +165,21 @@ app.post("/api/assign", (req, res) => {
 // EMPLACEMENTS
 // ------------------------------------------------------------
 app.get("/api/emplacements", (req, res) => {
-  db.all(
-    "SELECT roll_id, emplacement, statut FROM rolls ORDER BY emplacement ASC",
-    [],
-    (err, rows) => {
-      if (err) return res.status(500).json({ error: "Erreur DB" });
-      res.json({ emplacements: rows });
-    }
-  );
+  db.all("SELECT roll_id, emplacement, statut FROM rolls ORDER BY emplacement ASC", [], (err, rows) => {
+    res.json({ emplacements: rows });
+  });
 });
 
 // ------------------------------------------------------------
 // HISTORIQUE COMPLET
 // ------------------------------------------------------------
 app.get("/api/historique", (req, res) => {
-  const sql = `
-    SELECT h.date, h.roll_id, h.emplacement, h.statut, h.action
-    FROM historique h
-    ORDER BY h.date DESC
-  `;
-  db.all(sql, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Erreur DB" });
-    res.json({ historique: rows });
-  });
+  db.all(
+    "SELECT date, roll_id, emplacement, statut, action FROM historique ORDER BY date DESC",
+    [],
+    (err, rows) => res.json({ historique: rows })
+  );
 });
 
 // ------------------------------------------------------------
-// EXPORT CSV
-// ------------------------------------------------------------
-app.get("/api/export", (req, res) => {
-  const sql = `
-    SELECT h.date, h.roll_id, h.emplacement, h.statut, h.action
-    FROM historique h
-    ORDER BY h.date ASC
-  `;
-  db.all(sql, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Erreur DB" });
-
-    res.setHeader("Content-Type", "text/csv; charset=utf-8");
-    res.setHeader("Content-Disposition", "attachment; filename=historique_rolls.csv");
-
-    let csv = "date;roll_id;emplacement;statut;action\n";
-    rows.forEach((r) => {
-      csv += `${r.date};${r.roll_id};${r.emplacement};${r.statut};${r.action}\n`;
-    });
-
-    res.send(csv);
-  });
-});
-
-// ------------------------------------------------------------
-app.listen(PORT, () => {
-  console.log("Serveur démarré sur le port " + PORT);
-});
+app.listen(PORT, () => console.log("Serveur démarré sur le port " + PORT));
