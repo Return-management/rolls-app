@@ -40,3 +40,15 @@ pre {
 #app {
   margin-top: 10px;
 }
+#header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logo {
+  height: 60px;
+  object-fit: contain;
+}
+
