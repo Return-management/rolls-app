@@ -1,29 +1,25 @@
-// ---------------------------
-// VARIABLES
-// ---------------------------
+/* ============================================================
+   VARIABLES GLOBALES
+============================================================ */
 let userId = null;
 let isAdmin = false;
 let scans = [];
 let usersCache = {};
 let inactivityTimer = null;
+
 let scannerStream = null;
 let codeReader = new ZXing.BrowserMultiFormatReader();
 
-// RÉFÉRENCES DOM
-const loginDiv = document.getElementById("login");
-const appDiv = document.getElementById("app");
-
-// ---------------------------
-// DECONNEXION
-// ---------------------------
+/* ============================================================
+   DECONNEXION + INACTIVITÉ
+============================================================ */
 function logout() {
   userId = null;
   isAdmin = false;
 
-  btnAdmin.style.display = "none";
-
-  appDiv.style.display = "none";
-  loginDiv.style.display = "block";
+  document.getElementById("btnAdmin").style.display = "none";
+  document.getElementById("app").style.display = "none";
+  document.getElementById("login").style.display = "block";
 
   loginUser.value = "";
   loginPass.value = "";
@@ -35,7 +31,6 @@ document.getElementById("btnLogout").addEventListener("click", logout);
 
 function resetInactivityTimer() {
   clearTimeout(inactivityTimer);
-
   inactivityTimer = setTimeout(() => {
     alert("Déconnexion automatique après 5 minutes d'inactivité.");
     logout();
@@ -46,9 +41,9 @@ function resetInactivityTimer() {
   document.addEventListener(evt, resetInactivityTimer);
 });
 
-// ---------------------------
-// CONNEXION
-// ---------------------------
+/* ============================================================
+   CONNEXION
+============================================================ */
 document.getElementById("btnLogin").addEventListener("click", login);
 
 async function login() {
@@ -73,19 +68,19 @@ async function login() {
 
   currentUser.textContent = username;
 
-  loginDiv.style.display = "none";
-  appDiv.style.display = "block";
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
 
-  if (isAdmin) btnAdmin.style.display = "inline-block";
+  if (isAdmin) document.getElementById("btnAdmin").style.display = "inline-block";
 
   await chargerUsersCache();
   showScan();
   resetInactivityTimer();
 }
 
-// ---------------------------
-// CHARGER LES UTILISATEURS
-// ---------------------------
+/* ============================================================
+   CHARGER UTILISATEURS
+============================================================ */
 async function chargerUsersCache() {
   const res = await fetch("/api/admin/listUsers");
   const data = await res.json();
@@ -96,13 +91,13 @@ async function chargerUsersCache() {
   });
 }
 
-// ---------------------------
-// NAVIGATION
-// ---------------------------
-btnPageScan.addEventListener("click", showScan);
-btnEmplacements.addEventListener("click", showEmplacements);
-btnHistorique.addEventListener("click", showHistorique);
-btnAdmin.addEventListener("click", showAdmin);
+/* ============================================================
+   NAVIGATION
+============================================================ */
+document.getElementById("btnPageScan").addEventListener("click", showScan);
+document.getElementById("btnEmplacements").addEventListener("click", showEmplacements);
+document.getElementById("btnHistorique").addEventListener("click", showHistorique);
+document.getElementById("btnAdmin").addEventListener("click", showAdmin);
 
 function hideAllPages() {
   pageScan.style.display = "none";
@@ -136,13 +131,12 @@ function showAdmin() {
   chargerUtilisateurs();
 }
 
-// ---------------------------
-// SCAN
-// ---------------------------
-document.getElementById("scan").addEventListener("keydown", (e) => {
+/* ============================================================
+   SCAN ROLL
+============================================================ */
+document.getElementById("scan").addEventListener("keydown", e => {
   if (e.key === "Enter") traiterScan();
 });
-
 document.getElementById("btnScanValidate").addEventListener("click", traiterScan);
 
 async function traiterScan() {
@@ -157,36 +151,37 @@ async function traiterScan() {
 
   const data = await res.json();
 
-  document.getElementById("lastRoll").textContent = code;
+  lastRoll.textContent = code;
 
-  if (data.type === "new_roll" || data.type === "existing_roll") {
-
-    if (data.type === "existing_roll") {
-      remplirTableauHistoriqueScan(data.historique);
-    }
-
-    const modal = document.getElementById("modalEmplacement");
-    const inputEmpl = document.getElementById("modalEmplInput");
-    const btnValider = document.getElementById("modalEmplValider");
-
-    modal.style.display = "flex";
-    inputEmpl.value = "";
-
-    btnValider.onclick = async () => {
-      const emplacement = inputEmpl.value.trim();
-      modal.style.display = "none";
-      await assignerRoll(code, emplacement);
-    };
+  /* --- Si le roll existe déjà → afficher emplacement actuel --- */
+  if (data.type === "existing_roll" && data.historique.length > 0) {
+    const last = data.historique[data.historique.length - 1];
+    alert(`Ce roll est déjà enregistré à l’emplacement : ${last.emplacement}`);
+    remplirTableauHistoriqueScan(data.historique);
   }
+
+  /* --- Ouvrir la fenêtre d’emplacement --- */
+  const modal = document.getElementById("modalEmplacement");
+  const inputEmpl = document.getElementById("modalEmplInput");
+  const btnValider = document.getElementById("modalEmplValider");
+
+  modal.style.display = "flex";
+  inputEmpl.value = "";
+
+  btnValider.onclick = async () => {
+    const emplacement = inputEmpl.value.trim();
+    modal.style.display = "none";
+    await assignerRoll(code, emplacement);
+  };
 
   scan.value = "";
 }
 
-// ---------------------------
-// ASSIGNATION
-// ---------------------------
+/* ============================================================
+   ASSIGNATION ROLL → EMPLACEMENT
+============================================================ */
 async function assignerRoll(roll_id, emplacement) {
-  const statut = document.getElementById("statut").value;
+  const statut = statut.value;
 
   let res = await fetch("/api/assign", {
     method: "POST",
@@ -202,12 +197,13 @@ async function assignerRoll(roll_id, emplacement) {
 
   let data = await res.json();
 
+  /* --- Emplacement déjà occupé → confirmation --- */
   if (data.conflict) {
-    const confirmReplace = confirm(
-      `⚠ L’emplacement "${emplacement}" contient déjà le roll "${data.existingRoll}". Voulez-vous l’écraser ?`
+    const ok = confirm(
+      `⚠ L’emplacement "${emplacement}" est déjà occupé par le roll "${data.existingRoll}".\nVoulez-vous le remplacer ?`
     );
 
-    if (!confirmReplace) return;
+    if (!ok) return;
 
     res = await fetch("/api/assign", {
       method: "POST",
@@ -230,16 +226,16 @@ async function assignerRoll(roll_id, emplacement) {
   }
 }
 
-// ---------------------------
-// TABLEAU DES SCANS
-// ---------------------------
+/* ============================================================
+   TABLEAU DES SCANS
+============================================================ */
 function ajouterScanTableau(roll, emplacement, statut) {
   const date = new Date().toLocaleString();
-  const username = currentUser.textContent || "";
+  const username = currentUser.textContent;
 
   scans.push({ roll, emplacement, statut, date, username });
 
-  const tbody = document.querySelector("#tableScans tbody");
+  const tbody = tableScans.querySelector("tbody");
   const tr = document.createElement("tr");
 
   tr.innerHTML = `
@@ -253,16 +249,17 @@ function ajouterScanTableau(roll, emplacement, statut) {
   tbody.appendChild(tr);
 }
 
-// ---------------------------
-// HISTORIQUE DU ROLL
-// ---------------------------
+/* ============================================================
+   HISTORIQUE DU ROLL
+============================================================ */
 function remplirTableauHistoriqueScan(historique) {
-  const tbody = document.querySelector("#tableHistoriqueScan tbody");
+  const tbody = tableHistoriqueScan.querySelector("tbody");
   tbody.innerHTML = "";
 
   historique.forEach(h => {
-    const username = h.username || usersCache[h.user_id] || "";
+    const username = usersCache[h.user_id] || "(inconnu)";
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
       <td>${h.date}</td>
       <td>${h.emplacement}</td>
@@ -270,47 +267,50 @@ function remplirTableauHistoriqueScan(historique) {
       <td>${username}</td>
       <td>${h.action}</td>
     `;
+
     tbody.appendChild(tr);
   });
 }
 
-// ---------------------------
-// EMPLACEMENTS
-// ---------------------------
+/* ============================================================
+   EMPLACEMENTS
+============================================================ */
 async function chargerEmplacements() {
   const res = await fetch("/api/emplacements");
   const data = await res.json();
 
-  const tbody = document.querySelector("#tableEmplacements tbody");
+  const tbody = tableEmplacements.querySelector("tbody");
   tbody.innerHTML = "";
 
   data.emplacements.forEach(e => {
     const username = usersCache[e.user_id] || "(inconnu)";
-
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
       <td>${e.emplacement}</td>
       <td>${e.roll_id}</td>
       <td>${e.statut}</td>
       <td>${username}</td>
     `;
+
     tbody.appendChild(tr);
   });
 }
 
-// ---------------------------
-// HISTORIQUE COMPLET
-// ---------------------------
+/* ============================================================
+   HISTORIQUE COMPLET
+============================================================ */
 async function chargerHistorique() {
   const res = await fetch("/api/historique");
   const data = await res.json();
 
-  const tbody = document.querySelector("#tableHistorique tbody");
+  const tbody = tableHistorique.querySelector("tbody");
   tbody.innerHTML = "";
 
   data.historique.forEach(h => {
-    const username = h.username || usersCache[h.user_id] || "";
+    const username = usersCache[h.user_id] || "(inconnu)";
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
       <td>${h.date}</td>
       <td>${h.roll_id}</td>
@@ -319,13 +319,14 @@ async function chargerHistorique() {
       <td>${username}</td>
       <td>${h.action}</td>
     `;
+
     tbody.appendChild(tr);
   });
 }
 
-// ---------------------------
-// ADMIN
-// ---------------------------
+/* ============================================================
+   ADMINISTRATION
+============================================================ */
 async function chargerUtilisateurs() {
   const res = await fetch("/api/admin/listUsers");
   const data = await res.json();
@@ -401,9 +402,9 @@ document.getElementById("btnExportUsers").addEventListener("click", () => {
   window.location.href = "/api/admin/exportUsers";
 });
 
-// ---------------------------
-// RECHERCHE AVANCÉE
-// ---------------------------
+/* ============================================================
+   FILTRES TABLEAUX
+============================================================ */
 function filtrerTableauAvance(options) {
   const { tableId, rollIndex, statutIndex, emplacementIndex, searchId, statutId, emplacementId } = options;
 
@@ -426,9 +427,6 @@ function filtrerTableauAvance(options) {
   });
 }
 
-// ---------------------------
-// FILTRES EMPLACEMENTS
-// ---------------------------
 function activerFiltresEmplacements() {
   const options = {
     tableId: "tableEmplacements",
@@ -440,21 +438,18 @@ function activerFiltresEmplacements() {
     emplacementId: "filterEmplacementEmpl"
   };
 
-  document.getElementById("searchEmplacements").addEventListener("input", () => filtrerTableauAvance(options));
-  document.getElementById("filterStatutEmpl").addEventListener("change", () => filtrerTableauAvance(options));
-  document.getElementById("filterEmplacementEmpl").addEventListener("input", () => filtrerTableauAvance(options));
+  searchEmplacements.addEventListener("input", () => filtrerTableauAvance(options));
+  filterStatutEmpl.addEventListener("change", () => filtrerTableauAvance(options));
+  filterEmplacementEmpl.addEventListener("input", () => filtrerTableauAvance(options));
 
-  document.getElementById("clearSearchEmpl").addEventListener("click", () => {
-    document.getElementById("searchEmplacements").value = "";
-    document.getElementById("filterStatutEmpl").value = "";
-    document.getElementById("filterEmplacementEmpl").value = "";
+  clearSearchEmpl.addEventListener("click", () => {
+    searchEmplacements.value = "";
+    filterStatutEmpl.value = "";
+    filterEmplacementEmpl.value = "";
     filtrerTableauAvance(options);
   });
 }
 
-// ---------------------------
-// FILTRES HISTORIQUE
-// ---------------------------
 function activerFiltresHistorique() {
   const options = {
     tableId: "tableHistorique",
@@ -466,35 +461,31 @@ function activerFiltresHistorique() {
     emplacementId: "filterEmplacementHist"
   };
 
-  document.getElementById("searchHistorique").addEventListener("input", () => filtrerTableauAvance(options));
-  document.getElementById("filterStatutHist").addEventListener("change", () => filtrerTableauAvance(options));
-  document.getElementById("filterEmplacementHist").addEventListener("input", () => filtrerTableauAvance(options));
+  searchHistorique.addEventListener("input", () => filtrerTableauAvance(options));
+  filterStatutHist.addEventListener("change", () => filtrerTableauAvance(options));
+  filterEmplacementHist.addEventListener("input", () => filtrerTableauAvance(options));
 
-  document.getElementById("clearSearchHist").addEventListener("click", () => {
-    document.getElementById("searchHistorique").value = "";
-    document.getElementById("filterStatutHist").value = "";
-    document.getElementById("filterEmplacementHist").value = "";
+  clearSearchHist.addEventListener("click", () => {
+    searchHistorique.value = "";
+    filterStatutHist.value = "";
+    filterEmplacementHist.value = "";
     filtrerTableauAvance(options);
   });
 }
 
-// ---------------------------
-// FORMULAIRE MANUEL
-// ---------------------------
+/* ============================================================
+   FORMULAIRE MANUEL
+============================================================ */
 document.getElementById("btnSavePanel").addEventListener("click", enregistrerEmplacement);
 
 async function enregistrerEmplacement() {
-  let roll = document.getElementById("panelRoll").value.trim();
-  const emplacement = document.getElementById("panelEmplacement").value.trim();
-  let statut = document.getElementById("panelStatut").value;
+  let roll = panelRoll.value.trim();
+  const emplacement = panelEmplacement.value.trim();
+  let statut = panelStatut.value;
 
   if (!roll) {
-    const confirmEmpty = confirm(
-      "⚠ Aucun roll n'a été renseigné.\nVoulez-vous enregistrer l'emplacement sans roll ?"
-    );
-
-    if (!confirmEmpty) return;
-
+    const ok = confirm("Aucun roll renseigné. Enregistrer quand même ?");
+    if (!ok) return;
     roll = "EMPTY-" + Date.now();
     statut = "";
   }
@@ -514,11 +505,10 @@ async function enregistrerEmplacement() {
   let data = await res.json();
 
   if (data.conflict) {
-    const confirmReplace = confirm(
+    const ok = confirm(
       `⚠ L’emplacement "${emplacement}" contient déjà le roll "${data.existingRoll}". Voulez-vous l’écraser ?`
     );
-
-    if (!confirmReplace) return;
+    if (!ok) return;
 
     res = await fetch("/api/assign", {
       method: "POST",
@@ -537,19 +527,26 @@ async function enregistrerEmplacement() {
 
   if (data.success) {
     chargerEmplacements();
-    document.getElementById("panelRoll").value = "";
-    document.getElementById("panelEmplacement").value = "";
-    document.getElementById("panelStatut").value = "Arrivé";
+    panelRoll.value = "";
+    panelEmplacement.value = "";
+    panelStatut.value = "Arrivé";
   }
 }
 
-// ---------------------------
-// SCANNER CODE-BARRES / QR AVEC ZXING
-// ---------------------------
+/* ============================================================
+   SCANNER ZXING — TOUJOURS DEVANT
+============================================================ */
 async function lancerScanner(targetInputId) {
-  try {
-    document.getElementById("scannerModal").style.display = "flex";
 
+  // Si la fenêtre d’emplacement est ouverte → la cacher temporairement
+  const modalEmpl = document.getElementById("modalEmplacement");
+  const wasModalOpen = modalEmpl.style.display === "flex";
+  if (wasModalOpen) modalEmpl.style.display = "none";
+
+  // Ouvrir le scanner
+  document.getElementById("scannerModal").style.display = "flex";
+
+  try {
     const video = document.getElementById("scannerVideo");
 
     scannerStream = await navigator.mediaDevices.getUserMedia({
@@ -562,8 +559,12 @@ async function lancerScanner(targetInputId) {
     codeReader.decodeFromVideoDevice(null, "scannerVideo", (result, err) => {
       if (result) {
         fermerScanner();
+
         const input = document.getElementById(targetInputId);
         if (input) input.value = result.text;
+
+        // Réafficher la fenêtre d’emplacement si elle était ouverte
+        if (wasModalOpen) modalEmpl.style.display = "flex";
       }
     });
 
@@ -584,11 +585,3 @@ function fermerScanner() {
 }
 
 document.getElementById("closeScanner").addEventListener("click", fermerScanner);
-
-document.getElementById("btnScanCamera").addEventListener("click", () => {
-  lancerScanner("scan");
-});
-
-document.getElementById("btnScanRoll").addEventListener("click", () => {
-  lancerScanner("panelRoll");
-});
