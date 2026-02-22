@@ -51,6 +51,7 @@ db.serialize(() => {
     )
   `);
 
+  // Admin par défaut
   db.run(
     "INSERT OR IGNORE INTO auth(username, password) VALUES (?, ?)",
     ["admin", "admin"]
@@ -58,7 +59,7 @@ db.serialize(() => {
 });
 
 // ------------------------------------------------------------
-// UTILISATEURS SIMPLES (login par nom)
+// LOGIN UTILISATEUR SIMPLE
 // ------------------------------------------------------------
 function getOrCreateUser(nom, cb) {
   db.get("SELECT id FROM users WHERE nom = ?", [nom], (err, row) => {
@@ -243,7 +244,6 @@ app.get("/api/export", (req, res) => {
 // ------------------------------------------------------------
 app.post("/api/admin/login", (req, res) => {
   const { username, password } = req.body;
-  if (!username || !password) return res.json({ success: false });
 
   db.get(
     "SELECT * FROM auth WHERE username = ? AND password = ?",
@@ -257,7 +257,7 @@ app.post("/api/admin/login", (req, res) => {
 });
 
 // ------------------------------------------------------------
-// ADMIN — LISTE UTILISATEURS (MANQUAIT DANS TON CODE)
+// ADMIN — LISTE UTILISATEURS
 // ------------------------------------------------------------
 app.get("/api/admin/listUsers", (req, res) => {
   db.all("SELECT id, username, password FROM auth ORDER BY username ASC", [], (err, rows) => {
@@ -271,6 +271,7 @@ app.get("/api/admin/listUsers", (req, res) => {
 // ------------------------------------------------------------
 app.post("/api/admin/addUser", (req, res) => {
   const { username, password } = req.body;
+
   if (!username || !password)
     return res.json({ success: false, error: "Données manquantes" });
 
