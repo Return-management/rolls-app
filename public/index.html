@@ -26,6 +26,7 @@
   <div id="app" style="display:none;">
     <p>Connecté en tant que <span id="currentUser"></span></p>
 
+    <!-- MENU -->
     <div class="menu">
       <button id="btnPageScan">Scan</button>
       <button id="btnEmplacements">Emplacements</button>
@@ -100,12 +101,14 @@
     <div id="pageAdmin" style="display:none;">
       <h2>Administration</h2>
 
+      <!-- LOGIN ADMIN -->
       <div id="adminLogin">
         <input type="text" id="adminUser" placeholder="Admin" />
         <input type="password" id="adminPass" placeholder="Mot de passe" />
         <button id="btnAdminLogin">Connexion</button>
       </div>
 
+      <!-- PANEL ADMIN -->
       <div id="adminPanel" style="display:none;">
         <h3>Ajouter un utilisateur</h3>
         <input type="text" id="newUser" placeholder="Identifiant" />
@@ -113,7 +116,7 @@
         <button id="btnAddUser">Ajouter</button>
 
         <h3>Liste des utilisateurs</h3>
-        <pre id="listeUsers"></pre>
+        <div id="listeUsers"></div>
 
         <button id="btnExportUsers">Exporter identifiants</button>
 
