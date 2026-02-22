@@ -4,11 +4,43 @@
 let userId = null;
 let isAdmin = false;
 let scans = [];
-let usersCache = {}; // Pour afficher le nom du user dans Emplacements
+let usersCache = {}; 
+let inactivityTimer = null;
 
 // RÉFÉRENCES DOM
 const loginDiv = document.getElementById("login");
 const appDiv = document.getElementById("app");
+
+// ---------------------------
+// DECONNEXION
+// ---------------------------
+function logout() {
+  userId = null;
+  isAdmin = false;
+
+  appDiv.style.display = "none";
+  loginDiv.style.display = "block";
+
+  loginUser.value = "";
+  loginPass.value = "";
+
+  clearTimeout(inactivityTimer);
+}
+
+document.getElementById("btnLogout").addEventListener("click", logout);
+
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+
+  inactivityTimer = setTimeout(() => {
+    alert("Déconnexion automatique après 5 minutes d'inactivité.");
+    logout();
+  }, 5 * 60 * 1000);
+}
+
+["click", "keydown", "mousemove", "scroll", "touchstart"].forEach(evt => {
+  document.addEventListener(evt, resetInactivityTimer);
+});
 
 // ---------------------------
 // CONNEXION
@@ -42,12 +74,13 @@ async function login() {
 
   if (isAdmin) btnAdmin.style.display = "inline-block";
 
-  await chargerUsersCache(); // Pour afficher les noms dans Emplacements
+  await chargerUsersCache();
   showScan();
+  resetInactivityTimer();
 }
 
 // ---------------------------
-// CHARGER LES UTILISATEURS POUR AFFICHAGE
+// CHARGER LES UTILISATEURS
 // ---------------------------
 async function chargerUsersCache() {
   const res = await fetch("/api/admin/listUsers");
@@ -136,7 +169,7 @@ async function traiterScan() {
 }
 
 // ---------------------------
-// ASSIGNATION AVEC GESTION DES CONFLITS
+// ASSIGNATION
 // ---------------------------
 async function assignerRoll(roll_id, emplacement) {
   const statut = document.getElementById("statut").value;
@@ -157,7 +190,7 @@ async function assignerRoll(roll_id, emplacement) {
 
   if (data.conflict) {
     const confirmReplace = confirm(
-      `⚠ L’emplacement "${emplacement}" contient déjà le roll "${data.existingRoll}".\nVoulez-vous l’écraser ?`
+      `⚠ L’emplacement "${emplacement}" contient déjà le roll "${data.existingRoll}". Voulez-vous l’écraser ?`
     );
 
     if (!confirmReplace) return;
@@ -205,7 +238,7 @@ function ajouterScanTableau(roll, emplacement, statut) {
 }
 
 // ---------------------------
-// HISTORIQUE DU ROLL SCANNÉ
+// HISTORIQUE DU ROLL
 // ---------------------------
 function remplirTableauHistoriqueScan(historique) {
   const tbody = document.querySelector("#tableHistoriqueScan tbody");
@@ -224,7 +257,7 @@ function remplirTableauHistoriqueScan(historique) {
 }
 
 // ---------------------------
-// EMPLACEMENTS (MODIFIÉ)
+// EMPLACEMENTS
 // ---------------------------
 async function chargerEmplacements() {
   const res = await fetch("/api/emplacements");
@@ -346,7 +379,7 @@ document.getElementById("btnExportUsers").addEventListener("click", () => {
 });
 
 // ---------------------------
-// 🔍 RECHERCHE AVANCÉE
+// RECHERCHE AVANCÉE
 // ---------------------------
 function filtrerTableauAvance(options) {
   const { tableId, rollIndex, statutIndex, emplacementIndex, searchId, statutId, emplacementId } = options;
@@ -371,7 +404,7 @@ function filtrerTableauAvance(options) {
 }
 
 // ---------------------------
-// 🔍 FILTRES EMPLACEMENTS
+// FILTRES EMPLACEMENTS
 // ---------------------------
 function activerFiltresEmplacements() {
   const options = {
@@ -397,7 +430,7 @@ function activerFiltresEmplacements() {
 }
 
 // ---------------------------
-// 🔍 FILTRES HISTORIQUE
+// FILTRES HISTORIQUE
 // ---------------------------
 function activerFiltresHistorique() {
   const options = {
@@ -423,7 +456,7 @@ function activerFiltresHistorique() {
 }
 
 // ---------------------------
-// FORMULAIRE MANUEL (MODIFIÉ)
+// FORMULAIRE MANUEL
 // ---------------------------
 document.getElementById("btnSavePanel").addEventListener("click", enregistrerEmplacement);
 
@@ -432,7 +465,6 @@ async function enregistrerEmplacement() {
   const emplacement = document.getElementById("panelEmplacement").value.trim();
   let statut = document.getElementById("panelStatut").value;
 
-  // 👉 Si roll vide → demander confirmation
   if (!roll) {
     const confirmEmpty = confirm(
       "⚠ Aucun roll n'a été renseigné.\nVoulez-vous enregistrer l'emplacement sans roll ?"
@@ -440,8 +472,8 @@ async function enregistrerEmplacement() {
 
     if (!confirmEmpty) return;
 
-    roll = "Libre";
-    statut = ""; // Pas de statut si roll vide
+    roll = "EMPTY-" + Date.now();
+    statut = "";
   }
 
   let res = await fetch("/api/assign", {
@@ -460,7 +492,7 @@ async function enregistrerEmplacement() {
 
   if (data.conflict) {
     const confirmReplace = confirm(
-      `⚠ L’emplacement "${emplacement}" contient déjà le roll "${data.existingRoll}".\nVoulez-vous l’écraser ?`
+      `⚠ L’emplacement "${emplacement}" contient déjà le roll "${data.existingRoll}". Voulez-vous l’écraser ?`
     );
 
     if (!confirmReplace) return;
@@ -487,4 +519,3 @@ async function enregistrerEmplacement() {
     document.getElementById("panelStatut").value = "Arrivé";
   }
 }
-
