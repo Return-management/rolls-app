@@ -7,6 +7,7 @@
 </head>
 <body>
 
+  <!-- LOGOS -->
   <div id="header">
     <img src="logo1.png" class="logo" />
     <img src="logo2.png" class="logo" />
@@ -45,7 +46,17 @@
         <option>Expédié</option>
       </select>
 
-      <input type="text" id="scan" placeholder="Scanner un roll" autofocus />
+      <input 
+        type="text" 
+        id="scan" 
+        placeholder="Scanner un roll"
+        inputmode="numeric"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        autofocus
+      />
 
       <button id="btnAlertes">Alertes</button>
       <button id="btnExport">Exporter CSV</button>
@@ -61,7 +72,17 @@
     <div id="pageEmplacements" style="display:none;">
       <h2>Emplacements</h2>
 
-      <input type="text" id="scanRecherche" placeholder="Scanner un roll" />
+      <input 
+        type="text" 
+        id="scanRecherche" 
+        placeholder="Scanner un roll"
+        inputmode="numeric"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
+
       <p>Dernier roll scanné : <span id="dernierScan"></span></p>
 
       <h3>Liste des emplacements</h3>
