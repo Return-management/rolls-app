@@ -16,6 +16,8 @@ const db = new sqlite3.Database("rolls.db");
 // INITIALISATION DES TABLES
 // ------------------------------------------------------------
 db.serialize(() => {
+
+  // TABLE UTILISATEURS
   db.run(`
     CREATE TABLE IF NOT EXISTS auth (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,14 +32,19 @@ db.serialize(() => {
     ["admin", "admin", 1]
   );
 
+  // TABLE ROLLS (RECRÉÉE AVEC user_id)
+  db.run(`DROP TABLE IF EXISTS rolls`);
+
   db.run(`
     CREATE TABLE IF NOT EXISTS rolls (
       roll_id TEXT PRIMARY KEY,
       emplacement TEXT,
-      statut TEXT
+      statut TEXT,
+      user_id INTEGER
     )
   `);
 
+  // TABLE HISTORIQUE
   db.run(`
     CREATE TABLE IF NOT EXISTS historique (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -157,8 +164,8 @@ app.post("/api/assign", (req, res) => {
     }
 
     db.run(
-      "INSERT OR REPLACE INTO rolls(roll_id, emplacement, statut) VALUES (?,?,?)",
-      [roll_id, emplacement, statut],
+      "INSERT OR REPLACE INTO rolls(roll_id, emplacement, statut, user_id) VALUES (?,?,?,?)",
+      [roll_id, emplacement, statut, userId],
       () => {
         db.run(
           "INSERT INTO historique(date, roll_id, emplacement, statut, user_id, action) VALUES (?,?,?,?,?,?)",
@@ -174,9 +181,11 @@ app.post("/api/assign", (req, res) => {
 // EMPLACEMENTS
 // ------------------------------------------------------------
 app.get("/api/emplacements", (req, res) => {
-  db.all("SELECT roll_id, emplacement, statut FROM rolls ORDER BY emplacement ASC", [], (err, rows) => {
-    res.json({ emplacements: rows });
-  });
+  db.all(
+    "SELECT roll_id, emplacement, statut, user_id FROM rolls ORDER BY emplacement ASC",
+    [],
+    (err, rows) => res.json({ emplacements: rows })
+  );
 });
 
 // ------------------------------------------------------------
