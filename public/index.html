@@ -86,7 +86,6 @@
 
       <p>Dernier roll scanné : <b id="lastRoll"></b></p>
 
-      <!-- 🔍 BARRE DE RECHERCHE AVANCÉE -->
       <div class="searchBox">
         <input type="text" id="searchEmplacements" placeholder="Rechercher un roll...">
         <select id="filterStatutEmpl">
@@ -117,7 +116,6 @@
     <div id="pageHistorique" class="bloc" style="display:none;">
       <h2>Historique complet</h2>
 
-      <!-- 🔍 BARRE DE RECHERCHE AVANCÉE -->
       <div class="searchBox">
         <input type="text" id="searchHistorique" placeholder="Rechercher un roll...">
         <select id="filterStatutHist">
@@ -149,12 +147,6 @@
     <!-- PAGE ADMIN -->
     <div id="pageAdmin" class="bloc" style="display:none;">
       <h2>Administration</h2>
-
-      <div class="menu">
-        <button onclick="showScan()">Scan</button>
-        <button onclick="showEmplacements()">Emplacements</button>
-        <button onclick="showHistorique()">Historique</button>
-      </div>
 
       <h3>Ajouter un utilisateur</h3>
       <input type="text" id="newUser" placeholder="Nom utilisateur" />
