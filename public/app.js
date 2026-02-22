@@ -1,95 +1,28 @@
-let currentUserId = null;
-let pendingRollId = null;
-
-// LOGIN
+// ---------------------------
+// VARIABLES
+// ---------------------------
 const loginDiv = document.getElementById("login");
+const appDiv = document.getElementById("app");
+
 const loginUser = document.getElementById("loginUser");
 const loginPass = document.getElementById("loginPass");
 const btnLogin = document.getElementById("btnLogin");
 const loginError = document.getElementById("loginError");
 
-// APP
-const appDiv = document.getElementById("app");
-const currentUserSpan = document.getElementById("currentUser");
-
-// MENU
-const btnPageScan = document.getElementById("btnPageScan");
-const btnEmplacements = document.getElementById("btnEmplacements");
-const btnHistorique = document.getElementById("btnHistorique");
 const btnAdmin = document.getElementById("btnAdmin");
-
-// PAGES
-const pageScan = document.getElementById("pageScan");
-const pageEmplacements = document.getElementById("pageEmplacements");
-const pageHistorique = document.getElementById("pageHistorique");
 const pageAdmin = document.getElementById("pageAdmin");
 
-// SCAN PAGE
-const scanInput = document.getElementById("scan");
-const statutSelect = document.getElementById("statut");
-const infoPre = document.getElementById("info");
-const histPre = document.getElementById("historique");
-const btnAlertes = document.getElementById("btnAlertes");
-const btnExport = document.getElementById("btnExport");
+const currentUser = document.getElementById("currentUser");
 
-// EMPLACEMENTS PAGE
-const scanRecherche = document.getElementById("scanRecherche");
-const listeEmplacements = document.getElementById("listeEmplacements");
-const dernierScan = document.getElementById("dernierScan");
+let userId = null;
+let isAdmin = false;
 
-// HISTORIQUE COMPLET PAGE
-const filtreHistorique = document.getElementById("filtreHistorique");
-const listeHistorique = document.getElementById("listeHistorique");
-
-// ADMIN PAGE
-const adminUser = document.getElementById("adminUser");
-const adminPass = document.getElementById("adminPass");
-const btnAdminLogin = document.getElementById("btnAdminLogin");
-const adminLoginDiv = document.getElementById("adminLogin");
-const adminPanelDiv = document.getElementById("adminPanel");
-const newUser = document.getElementById("newUser");
-const newPass = document.getElementById("newPass");
-const btnAddUser = document.getElementById("btnAddUser");
-const adminInfo = document.getElementById("adminInfo");
-const listeUsers = document.getElementById("listeUsers");
-const btnExportUsers = document.getElementById("btnExportUsers");
-
-// ------------------------------------------------------------
-// UTILITAIRE : empêcher l’accès sans login
-// ------------------------------------------------------------
-function requireLogin() {
-  if (!currentUserId) {
-    alert("Veuillez vous connecter.");
-    showPage(loginDiv);
-    return false;
-  }
-  return true;
-}
-
-// ------------------------------------------------------------
-// AFFICHAGE DES PAGES
-// ------------------------------------------------------------
-function showPage(page) {
-  pageScan.style.display = "none";
-  pageEmplacements.style.display = "none";
-  pageHistorique.style.display = "none";
-  pageAdmin.style.display = "none";
-  loginDiv.style.display = "none";
-
-  page.style.display = "block";
-}
-
-// ------------------------------------------------------------
-// LOGIN UTILISATEUR
-// ------------------------------------------------------------
+// ---------------------------
+// CONNEXION UNIQUE
+// ---------------------------
 btnLogin.addEventListener("click", async () => {
   const username = loginUser.value.trim();
   const password = loginPass.value.trim();
-
-  if (!username || !password) {
-    loginError.textContent = "Veuillez entrer identifiant et mot de passe.";
-    return;
-  }
 
   const res = await fetch("/api/login", {
     method: "POST",
@@ -104,234 +37,66 @@ btnLogin.addEventListener("click", async () => {
     return;
   }
 
-  currentUserId = data.userId;
-  currentUserSpan.textContent = username;
+  // Connexion OK
+  userId = data.userId;
+  isAdmin = data.isAdmin;
+
+  currentUser.textContent = username;
 
   loginDiv.style.display = "none";
   appDiv.style.display = "block";
-  showPage(pageScan);
-  scanInput.focus();
+
+  if (isAdmin) btnAdmin.style.display = "inline-block";
 });
 
-// ------------------------------------------------------------
+// ---------------------------
 // NAVIGATION
-// ------------------------------------------------------------
-btnPageScan.addEventListener("click", () => {
-  if (!requireLogin()) return;
-  showPage(pageScan);
-});
-
-btnEmplacements.addEventListener("click", async () => {
-  if (!requireLogin()) return;
-  showPage(pageEmplacements);
-
-  const res = await fetch("/api/emplacements");
-  const data = await res.json();
-
-  let txt = "";
-  data.emplacements.forEach((e) => {
-    txt += "- " + e.emplacement + "\n";
-  });
-
-  listeEmplacements.textContent = txt || "Aucun emplacement.";
-});
-
-btnHistorique.addEventListener("click", async () => {
-  if (!requireLogin()) return;
-  showPage(pageHistorique);
-
-  const res = await fetch("/api/historique");
-  const data = await res.json();
-
-  let txt = "";
-  data.historique.forEach((h) => {
-    txt += `${h.date} | ${h.roll_id} | ${h.emplacement} | ${h.statut} | ${h.utilisateur || ""} | ${h.action}\n`;
-  });
-
-  listeHistorique.textContent = txt || "Aucun mouvement.";
-});
-
+// ---------------------------
 btnAdmin.addEventListener("click", () => {
-  if (!requireLogin()) return;
-  showPage(pageAdmin);
+  hideAllPages();
+  pageAdmin.style.display = "block";
+  chargerUtilisateurs();
 });
 
-// ------------------------------------------------------------
-// SCAN PRINCIPAL
-// ------------------------------------------------------------
-scanInput.addEventListener("keydown", async (e) => {
-  if (e.key !== "Enter") return;
-  if (!currentUserId) return alert("Veuillez vous connecter.");
-
-  const code = scanInput.value.trim();
-  scanInput.value = "";
-  if (!code) return;
-
-  if (pendingRollId) {
-    const emplacement = code;
-    const statut = statutSelect.value;
-
-    const res = await fetch("/api/assign", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        roll_id: pendingRollId,
-        emplacement,
-        statut,
-        userId: currentUserId
-      })
-    });
-
-    const data = await res.json();
-    if (data.error) {
-      infoPre.textContent = "Erreur assignation : " + data.error;
-    } else {
-      infoPre.textContent =
-        `Roll ${pendingRollId} enregistré à l'emplacement ${emplacement} (statut : ${statut})`;
-      await afficherRoll(pendingRollId);
-    }
-
-    pendingRollId = null;
-    return;
-  }
-
-  const res = await fetch("/api/scan", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code })
+function hideAllPages() {
+  document.querySelectorAll("#app > div").forEach(div => {
+    if (div.id !== "currentUser") div.style.display = "none";
   });
-
-  const data = await res.json();
-  histPre.textContent = "";
-
-  if (data.type === "new_roll") {
-    if (!confirm(`Le roll ${data.roll_id} n'existe pas. Voulez-vous l'enregistrer ?`)) {
-      infoPre.textContent = "Roll ignoré.";
-      return;
-    }
-
-    pendingRollId = data.roll_id;
-    infoPre.textContent = `Nouveau roll : ${data.roll_id}\nScanner l'emplacement...`;
-  } 
-  else if (data.type === "existing_roll") {
-    const r = data.roll;
-
-    infoPre.textContent =
-      `Roll : ${r.roll_id}\nEmplacement : ${r.emplacement}\nStatut : ${r.statut}`;
-
-    let txt = "";
-    data.historique.forEach((h) => {
-      txt += `${h.date} | ${h.emplacement} | ${h.statut} | ${h.action}\n`;
-    });
-    histPre.textContent = txt || "Aucun historique.";
-
-    if (confirm(`Le roll ${r.roll_id} est actuellement à ${r.emplacement}. Voulez-vous le déplacer ?`)) {
-      pendingRollId = r.roll_id;
-      infoPre.textContent = `Scanner le nouvel emplacement pour ${r.roll_id}`;
-    }
-  }
-});
-
-// ------------------------------------------------------------
-// AFFICHER UN ROLL APRÈS MISE À JOUR
-// ------------------------------------------------------------
-async function afficherRoll(rollId) {
-  const res = await fetch("/api/scan", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code: rollId })
-  });
-
-  const data = await res.json();
-
-  if (data.type === "existing_roll") {
-    const r = data.roll;
-
-    infoPre.textContent =
-      `Roll : ${r.roll_id}\nEmplacement : ${r.emplacement}\nStatut : ${r.statut}`;
-
-    let txt = "";
-    data.historique.forEach((h) => {
-      txt += `${h.date} | ${h.emplacement} | ${h.statut} | ${h.action}\n`;
-    });
-
-    histPre.textContent = txt || "Aucun historique.";
-  }
 }
 
-// ------------------------------------------------------------
-// ALERTES
-// ------------------------------------------------------------
-btnAlertes.addEventListener("click", async () => {
-  const res = await fetch("/api/alertes");
+// ---------------------------
+// ADMIN : LISTE UTILISATEURS
+// ---------------------------
+async function chargerUtilisateurs() {
+  const res = await fetch("/api/admin/listUsers");
   const data = await res.json();
 
-  if (!data.alertes.length) {
-    alert("Aucune alerte.");
-    return;
-  }
+  const container = document.getElementById("listeUsers");
+  container.innerHTML = "";
 
-  let msg = "Rolls en alerte :\n\n";
-  data.alertes.forEach((a) => {
-    msg += `${a.roll_id} | ${a.emplacement} | dernière activité : ${a.last_date}\n`;
+  data.users.forEach(u => {
+    const div = document.createElement("div");
+    div.className = "userLine";
+
+    div.innerHTML = `
+      <b>${u.username}</b> 
+      <input type="password" id="pass_${u.id}" value="${u.password}">
+      <button onclick="updatePassword(${u.id})">Modifier</button>
+      <button onclick="deleteUser(${u.id})">Supprimer</button>
+    `;
+
+    container.appendChild(div);
   });
+}
 
-  alert(msg);
-});
+// ---------------------------
+// ADMIN : AJOUT UTILISATEUR
+// ---------------------------
+document.getElementById("btnAddUser").addEventListener("click", async () => {
+  const username = document.getElementById("newUser").value.trim();
+  const password = document.getElementById("newPass").value.trim();
 
-// ------------------------------------------------------------
-// EXPORT HISTORIQUE CSV
-// ------------------------------------------------------------
-btnExport.addEventListener("click", () => {
-  window.location.href = "/api/export";
-});
-
-// ------------------------------------------------------------
-// PAGE EMPLACEMENTS : recherche par scan
-// ------------------------------------------------------------
-scanRecherche.addEventListener("keydown", async (e) => {
-  if (e.key !== "Enter") return;
-
-  const code = scanRecherche.value.trim();
-  scanRecherche.value = "";
-  if (!code) return;
-
-  dernierScan.textContent = code;
-
-  const res = await fetch("/api/recherche/" + encodeURIComponent(code));
-  const data = await res.json();
-
-  if (!data.exists) {
-    alert("Ce roll n'existe pas encore.");
-    return;
-  }
-
-  alert(`Roll ${code} est actuellement à : ${data.emplacement} (statut : ${data.statut})`);
-});
-
-// ------------------------------------------------------------
-// PAGE HISTORIQUE COMPLET
-// ------------------------------------------------------------
-filtreHistorique.addEventListener("input", () => {
-  const filtre = filtreHistorique.value.toLowerCase();
-  const lignes = listeHistorique.textContent.split("\n");
-  const filtrées = lignes.filter((l) => l.toLowerCase().includes(filtre));
-  listeHistorique.textContent = filtrées.join("\n");
-});
-
-// ------------------------------------------------------------
-// PAGE ADMIN : LOGIN ADMIN
-// ------------------------------------------------------------
-btnAdminLogin.addEventListener("click", async () => {
-  const username = adminUser.value.trim();
-  const password = adminPass.value.trim();
-
-  if (!username || !password) {
-    alert("Saisir identifiant et mot de passe admin");
-    return;
-  }
-
-  const res = await fetch("/api/admin/login", {
+  const res = await fetch("/api/admin/addUser", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password })
@@ -340,88 +105,41 @@ btnAdminLogin.addEventListener("click", async () => {
   const data = await res.json();
 
   if (!data.success) {
-    alert("Mot de passe admin incorrect");
+    adminInfo.textContent = "Erreur : " + data.error;
     return;
   }
 
-  adminLoginDiv.style.display = "none";
-  adminPanelDiv.style.display = "block";
+  adminInfo.textContent = "Utilisateur ajouté.";
+  document.getElementById("newUser").value = "";
+  document.getElementById("newPass").value = "";
+
   chargerUtilisateurs();
 });
 
-// ------------------------------------------------------------
-// PAGE ADMIN : CHARGER UTILISATEURS
-// ------------------------------------------------------------
-async function chargerUtilisateurs() {
-  const res = await fetch("/api/admin/listUsers");
-  const data = await res.json();
-
-  listeUsers.innerHTML = "";
-
-  data.users.forEach((u) => {
-    const masked = "*".repeat(u.password.length || 8);
-
-    const div = document.createElement("div");
-    div.style.marginBottom = "10px";
-
-    div.innerHTML = `
-      <strong>${u.username}</strong> — ${masked}
-      <br>
-      <button onclick="modifierMotDePasse(${u.id}, '${u.username}')">Modifier</button>
-      <button onclick="supprimerUtilisateur(${u.id})" style="background:red;">Supprimer</button>
-      <hr>
-    `;
-
-    listeUsers.appendChild(div);
-  });
-}
-
-// ------------------------------------------------------------
-// PAGE ADMIN : SUPPRIMER UTILISATEUR
-// ------------------------------------------------------------
-async function supprimerUtilisateur(id) {
-  if (!confirm("Supprimer cet utilisateur ?")) return;
-
+// ---------------------------
+// ADMIN : SUPPRESSION
+// ---------------------------
+async function deleteUser(id) {
   const res = await fetch("/api/admin/deleteUser", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id })
   });
 
-  const data = await res.json();
-
-  if (data.success) {
-    chargerUtilisateurs();
-  } else {
-    alert("Erreur suppression");
-  }
+  chargerUtilisateurs();
 }
 
-// ------------------------------------------------------------
-// PAGE ADMIN : MODIFIER MOT DE PASSE
-// ------------------------------------------------------------
-async function modifierMotDePasse(id, username) {
-  const nouveau = prompt(`Nouveau mot de passe pour ${username} :`);
-  if (!nouveau) return;
+// ---------------------------
+// ADMIN : MODIFICATION MDP
+// ---------------------------
+async function updatePassword(id) {
+  const newPass = document.getElementById("pass_" + id).value;
 
   const res = await fetch("/api/admin/updatePassword", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id, password: nouveau })
+    body: JSON.stringify({ id, password: newPass })
   });
 
-  const data = await res.json();
-
-  if (data.success) {
-    chargerUtilisateurs();
-  } else {
-    alert("Erreur modification mot de passe");
-  }
+  chargerUtilisateurs();
 }
-
-// ------------------------------------------------------------
-// PAGE ADMIN : EXPORT USERS
-// ------------------------------------------------------------
-btnExportUsers.addEventListener("click", () => {
-  window.location.href = "/api/admin/exportUsers";
-});
