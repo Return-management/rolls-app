@@ -6,22 +6,22 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
   <div id="header">
-  <img src="logo1.png" class="logo" />
-  <img src="logo2.png" class="logo" />
-</div>
+    <img src="logo1.png" class="logo" />
+    <img src="logo2.png" class="logo" />
+  </div>
 
-  <h1>Suivi des rolls</h1>
+  <!-- LOGIN -->
+  <div id="login">
+    <h2>Connexion</h2>
+    <input type="text" id="loginUser" placeholder="Identifiant" />
+    <input type="password" id="loginPass" placeholder="Mot de passe" />
+    <button id="btnLogin">Se connecter</button>
+    <p id="loginError" style="color:red;"></p>
+  </div>
 
-<div id="login">
-  <h2>Connexion</h2>
-  <input type="text" id="loginUser" placeholder="Identifiant" />
-  <input type="password" id="loginPass" placeholder="Mot de passe" />
-  <button id="btnLogin">Se connecter</button>
-  <p id="loginError" style="color:red;"></p>
-</div>
-
-
+  <!-- APP -->
   <div id="app" style="display:none;">
     <p>Connecté en tant que <span id="currentUser"></span></p>
 
@@ -34,43 +34,36 @@
 
     <!-- PAGE SCAN -->
     <div id="pageScan">
-      <div class="bloc">
-        <label>Statut du roll :</label>
-        <select id="statut">
-          <option>Arrivé</option>
-          <option>En tri</option>
-          <option>En préparation</option>
-          <option>En attente</option>
-          <option>Expédié</option>
-        </select>
-      </div>
+      <h2>Scan</h2>
 
-      <div class="bloc">
-        <label>Scan code-barres :</label>
-        <input type="text" id="scan" autofocus />
-      </div>
+      <label>Statut :</label>
+      <select id="statut">
+        <option>Arrivé</option>
+        <option>En tri</option>
+        <option>En préparation</option>
+        <option>En attente</option>
+        <option>Expédié</option>
+      </select>
 
-      <div class="bloc">
-        <button id="btnAlertes">Voir les alertes</button>
-        <button id="btnExport">Exporter CSV</button>
-      </div>
+      <input type="text" id="scan" placeholder="Scanner un roll" autofocus />
 
-      <div class="bloc">
-        <h2>Infos</h2>
-        <pre id="info"></pre>
-      </div>
+      <button id="btnAlertes">Alertes</button>
+      <button id="btnExport">Exporter CSV</button>
 
-      <div class="bloc">
-        <h2>Historique du roll scanné</h2>
-        <pre id="historique"></pre>
-      </div>
+      <h3>Infos</h3>
+      <pre id="info"></pre>
+
+      <h3>Historique du roll</h3>
+      <pre id="historique"></pre>
     </div>
 
     <!-- PAGE EMPLACEMENTS -->
     <div id="pageEmplacements" style="display:none;">
       <h2>Emplacements</h2>
-      <input type="text" id="scanRecherche" placeholder="Scanner un roll pour connaître son emplacement" />
+
+      <input type="text" id="scanRecherche" placeholder="Scanner un roll" />
       <p>Dernier roll scanné : <span id="dernierScan"></span></p>
+
       <h3>Liste des emplacements</h3>
       <pre id="listeEmplacements"></pre>
     </div>
@@ -94,17 +87,15 @@
 
       <div id="adminPanel" style="display:none;">
         <h3>Ajouter un utilisateur</h3>
-        <input type="text" id="newUser" placeholder="Nom utilisateur" />
+        <input type="text" id="newUser" placeholder="Identifiant" />
         <input type="password" id="newPass" placeholder="Mot de passe" />
         <button id="btnAddUser">Ajouter</button>
         <pre id="adminInfo"></pre>
       </div>
     </div>
+
   </div>
 
   <script src="app.js"></script>
 </body>
 </html>
-
-
-
