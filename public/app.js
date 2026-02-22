@@ -7,6 +7,7 @@ let scans = [];
 let usersCache = {}; 
 let inactivityTimer = null;
 let scannerStream = null;
+let codeReader = new ZXing.BrowserMultiFormatReader();
 
 // RÉFÉRENCES DOM
 const loginDiv = document.getElementById("login");
@@ -524,7 +525,7 @@ async function enregistrerEmplacement() {
 }
 
 // ---------------------------
-// SCANNER CODE-BARRES / QR
+// SCANNER CODE-BARRES / QR AVEC ZXING
 // ---------------------------
 async function lancerScanner(targetInputId) {
   try {
@@ -539,26 +540,12 @@ async function lancerScanner(targetInputId) {
     video.srcObject = scannerStream;
     await video.play();
 
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    const scanLoop = setInterval(() => {
-      if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0);
-
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imageData.data, canvas.width, canvas.height);
-
-        if (code) {
-          clearInterval(scanLoop);
-          fermerScanner();
-
-          document.getElementById(targetInputId).value = code.data;
-        }
+    codeReader.decodeFromVideoDevice(null, "scannerVideo", (result, err) => {
+      if (result) {
+        fermerScanner();
+        document.getElementById(targetInputId).value = result.text;
       }
-    }, 200);
+    });
 
   } catch (err) {
     alert("Impossible d'accéder à la caméra.");
@@ -572,6 +559,8 @@ function fermerScanner() {
     scannerStream.getTracks().forEach(t => t.stop());
     scannerStream = null;
   }
+
+  codeReader.reset();
 }
 
 document.getElementById("closeScanner").addEventListener("click", fermerScanner);
