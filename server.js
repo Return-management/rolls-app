@@ -50,7 +50,7 @@ db.serialize(() => {
 
   db.run(
     "INSERT OR IGNORE INTO auth(username, password) VALUES (?, ?)",
-    ["admin", "Process01"]
+    ["admin", "admin"]
   );
 });
 
@@ -228,3 +228,4 @@ app.post("/api/admin/updatePassword", (req, res) => {
 app.listen(PORT, () => {
   console.log("Serveur démarré sur le port " + PORT);
 });
+
