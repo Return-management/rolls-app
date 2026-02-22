@@ -181,6 +181,14 @@ pre {
   font-size: 18px;
 }
 
+.validateBtn {
+  background: #43a047;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
 /* ------------------------------
    MODAL SCANNER
 ------------------------------ */
