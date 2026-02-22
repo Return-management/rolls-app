@@ -6,86 +6,70 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <h1>Suivi des rolls</h1>
 
-  <!-- LOGOS -->
-  <div id="header">
-    <img src="Action.jpg" class="logo" />
-    <img src="GXO.png" class="logo" />
-  </div>
-
-  <!-- LOGIN -->
+  <!-- PAGE DE CONNEXION UNIQUE -->
   <div id="login">
-    <h2>Connexion</h2>
-    <input type="text" id="loginUser" placeholder="Identifiant" />
-    <input type="password" id="loginPass" placeholder="Mot de passe" />
+    <label>Identifiant :</label>
+    <input type="text" id="loginUser" />
+
+    <label>Mot de passe :</label>
+    <input type="password" id="loginPass" />
+
     <button id="btnLogin">Se connecter</button>
+
     <p id="loginError" style="color:red;"></p>
   </div>
 
-  <!-- APP -->
+  <!-- APPLICATION -->
   <div id="app" style="display:none;">
     <p>Connecté en tant que <span id="currentUser"></span></p>
 
-    <!-- MENU -->
     <div class="menu">
       <button id="btnPageScan">Scan</button>
       <button id="btnEmplacements">Emplacements</button>
       <button id="btnHistorique">Historique complet</button>
-      <button id="btnAdmin">Administration</button>
+      <button id="btnAdmin" style="display:none;">Administration</button>
     </div>
 
     <!-- PAGE SCAN -->
     <div id="pageScan">
-      <h2>Scan</h2>
+      <div class="bloc">
+        <label>Statut du roll :</label>
+        <select id="statut">
+          <option>Arrivé</option>
+          <option>En tri</option>
+          <option>En préparation</option>
+          <option>En attente</option>
+          <option>Expédié</option>
+        </select>
+      </div>
 
-      <label>Statut :</label>
-      <select id="statut">
-        <option>Arrivé</option>
-        <option>En tri</option>
-        <option>En préparation</option>
-        <option>En attente</option>
-        <option>Expédié</option>
-      </select>
+      <div class="bloc">
+        <label>Scan code-barres :</label>
+        <input type="text" id="scan" autofocus />
+      </div>
 
-      <input 
-        type="text" 
-        id="scan" 
-        placeholder="Scanner un roll"
-        inputmode="numeric"
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="off"
-        spellcheck="false"
-        autofocus
-      />
+      <div class="bloc">
+        <button id="btnAlertes">Voir les alertes</button>
+        <button id="btnExport">Exporter CSV</button>
+      </div>
 
-      <button id="btnAlertes">Alertes</button>
-      <button id="btnExport">Exporter CSV</button>
+      <div class="bloc">
+        <h2>Infos</h2>
+        <pre id="info"></pre>
+      </div>
 
-      <h3>Infos</h3>
-      <pre id="info"></pre>
-
-      <h3>Historique du roll</h3>
-      <pre id="historique"></pre>
+      <div class="bloc">
+        <h2>Historique du roll scanné</h2>
+        <pre id="historique"></pre>
+      </div>
     </div>
 
     <!-- PAGE EMPLACEMENTS -->
     <div id="pageEmplacements" style="display:none;">
       <h2>Emplacements</h2>
-
-      <input 
-        type="text" 
-        id="scanRecherche" 
-        placeholder="Scanner un roll"
-        inputmode="numeric"
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="off"
-        spellcheck="false"
-      />
-
-      <p>Dernier roll scanné : <span id="dernierScan"></span></p>
-
+      <input type="text" id="scanRecherche" placeholder="Scanner un roll pour savoir où il est" />
       <h3>Liste des emplacements</h3>
       <pre id="listeEmplacements"></pre>
     </div>
@@ -97,36 +81,22 @@
       <pre id="listeHistorique"></pre>
     </div>
 
-    <!-- PAGE ADMIN -->
+    <!-- PAGE ADMIN (PLUS DE LOGIN ICI) -->
     <div id="pageAdmin" style="display:none;">
       <h2>Administration</h2>
 
-      <!-- LOGIN ADMIN -->
-      <div id="adminLogin">
-        <input type="text" id="adminUser" placeholder="Admin" />
-        <input type="password" id="adminPass" placeholder="Mot de passe" />
-        <button id="btnAdminLogin">Connexion</button>
-      </div>
+      <h3>Ajouter un utilisateur</h3>
+      <input type="text" id="newUser" placeholder="Nom utilisateur" />
+      <input type="password" id="newPass" placeholder="Mot de passe" />
+      <button id="btnAddUser">Ajouter</button>
 
-      <!-- PANEL ADMIN -->
-      <div id="adminPanel" style="display:none;">
-        <h3>Ajouter un utilisateur</h3>
-        <input type="text" id="newUser" placeholder="Identifiant" />
-        <input type="password" id="newPass" placeholder="Mot de passe" />
-        <button id="btnAddUser">Ajouter</button>
+      <h3>Liste des utilisateurs</h3>
+      <div id="listeUsers"></div>
 
-        <h3>Liste des utilisateurs</h3>
-        <div id="listeUsers"></div>
-
-        <button id="btnExportUsers">Exporter identifiants</button>
-
-        <pre id="adminInfo"></pre>
-      </div>
+      <pre id="adminInfo"></pre>
     </div>
-
   </div>
 
   <script src="app.js"></script>
 </body>
 </html>
-
