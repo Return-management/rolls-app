@@ -97,13 +97,16 @@ async function traiterScan() {
 
   const data = await res.json();
 
+  // Afficher le dernier roll scanné dans Emplacements
   document.getElementById("lastRoll").textContent = code;
 
+  // Nouveau roll
   if (data.type === "new_roll") {
     const emplacement = prompt("Nouveau roll détecté. Entrez l’emplacement :");
     if (emplacement) await assignerRoll(code, emplacement);
   }
 
+  // Roll existant
   if (data.type === "existing_roll") {
     remplirTableauHistoriqueScan(data.historique);
 
@@ -118,7 +121,7 @@ async function traiterScan() {
 // ASSIGNATION
 // ---------------------------
 async function assignerRoll(roll_id, emplacement) {
-  const statut = statutSelect.value;
+  const statut = document.getElementById("statut").value;
 
   const res = await fetch("/api/assign", {
     method: "POST",
@@ -135,6 +138,7 @@ async function assignerRoll(roll_id, emplacement) {
 
   if (data.success) {
     ajouterScanTableau(roll_id, emplacement, statut);
+    chargerEmplacements(); // mise à jour auto
   }
 }
 
@@ -191,9 +195,9 @@ async function chargerEmplacements() {
   data.emplacements.forEach(e => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${e.roll_id || ""}</td>
+      <td>${e.roll_id}</td>
       <td>${e.emplacement}</td>
-      <td>${e.statut || ""}</td>
+      <td>${e.statut}</td>
     `;
     tbody.appendChild(tr);
   });
