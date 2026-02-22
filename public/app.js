@@ -198,7 +198,7 @@ function remplirTableauHistoriqueScan(historique) {
 
   historique.forEach(h => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `
+    tr.innerinnerHTML = `
       <td>${h.date}</td>
       <td>${h.emplacement}</td>
       <td>${h.statut}</td>
@@ -405,30 +405,7 @@ function activerFiltresHistorique() {
 }
 
 // ---------------------------
-// PANNEAU COULISSANT (AJOUTÉ)
-// ---------------------------
-const panel = document.getElementById("sidePanel");
-const overlay = document.getElementById("overlay");
-
-document.getElementById("btnOpenPanel").addEventListener("click", () => {
-  document.getElementById("panelRoll").value = "";
-  document.getElementById("panelEmplacement").value = "";
-  document.getElementById("panelStatut").value = "Arrivé";
-
-  panel.classList.add("open");
-  overlay.style.display = "block";
-});
-
-document.getElementById("btnClosePanel").addEventListener("click", fermerPanel);
-overlay.addEventListener("click", fermerPanel);
-
-function fermerPanel() {
-  panel.classList.remove("open");
-  overlay.style.display = "none";
-}
-
-// ---------------------------
-// ENREGISTREMENT MANUEL D'UN EMPLACEMENT (AJOUTÉ)
+// FORMULAIRE MANUEL (AJOUTÉ)
 // ---------------------------
 document.getElementById("btnSavePanel").addEventListener("click", enregistrerEmplacement);
 
@@ -479,7 +456,9 @@ async function enregistrerEmplacement() {
   }
 
   if (data.success) {
-    fermerPanel();
     chargerEmplacements();
+    document.getElementById("panelRoll").value = "";
+    document.getElementById("panelEmplacement").value = "";
+    document.getElementById("panelStatut").value = "Arrivé";
   }
 }
