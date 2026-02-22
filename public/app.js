@@ -54,28 +54,34 @@ btnHistorique.addEventListener("click", () => showPage(pageHistorique));
 btnAdmin.addEventListener("click", () => showPage(pageAdmin));
 
 btnLogin.addEventListener("click", async () => {
-  const nom = userNameInput.value.trim();
-  if (!nom) return alert("Saisir un nom");
+  const username = document.getElementById("loginUser").value.trim();
+  const password = document.getElementById("loginPass").value.trim();
+
+  if (!username || !password) {
+    loginError.textContent = "Veuillez entrer identifiant et mot de passe.";
+    return;
+  }
 
   const res = await fetch("/api/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ nom })
+    body: JSON.stringify({ username, password })
   });
 
   const data = await res.json();
-  if (data.error) {
-    alert("Erreur de connexion");
+
+  if (!data.success) {
+    loginError.textContent = "Identifiant ou mot de passe incorrect.";
     return;
   }
 
   currentUserId = data.userId;
   loginDiv.style.display = "none";
   appDiv.style.display = "block";
-  currentUserSpan.textContent = nom;
+  currentUserSpan.textContent = username;
   showPage(pageScan);
-  scanInput.focus();
 });
+
 
 scanInput.addEventListener("keydown", async (e) => {
   if (e.key !== "Enter") return;
@@ -292,6 +298,7 @@ btnAddUser.addEventListener("click", async () => {
     adminInfo.textContent = "Erreur : " + (data.error || "inconnue");
   }
 });
+
 
 
 
