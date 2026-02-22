@@ -1,6 +1,6 @@
 {
   "name": "rolls-app",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Application de suivi des rolls",
   "main": "server.js",
   "scripts": {
