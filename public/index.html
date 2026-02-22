@@ -84,6 +84,8 @@
     <div id="pageEmplacements" class="bloc" style="display:none;">
       <h2>Emplacements</h2>
 
+      <button id="btnOpenPanel" class="btnAdd">Ajouter / Modifier un emplacement</button>
+
       <p>Dernier roll scanné : <b id="lastRoll"></b></p>
 
       <div class="searchBox">
@@ -110,6 +112,31 @@
         </thead>
         <tbody></tbody>
       </table>
+    </div>
+
+    <!-- PANNEAU COULISSANT -->
+    <div id="overlay"></div>
+
+    <div id="sidePanel">
+      <h2>Ajouter / Modifier un emplacement</h2>
+
+      <label>Roll :</label>
+      <input type="text" id="panelRoll">
+
+      <label>Emplacement :</label>
+      <input type="text" id="panelEmplacement">
+
+      <label>Statut :</label>
+      <select id="panelStatut">
+        <option>Arrivé</option>
+        <option>En tri</option>
+        <option>En préparation</option>
+        <option>En attente</option>
+        <option>Expédié</option>
+      </select>
+
+      <button id="btnSavePanel">Enregistrer</button>
+      <button id="btnClosePanel" class="btnCancel">Annuler</button>
     </div>
 
     <!-- PAGE HISTORIQUE COMPLET -->
