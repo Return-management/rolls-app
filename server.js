@@ -12,6 +12,9 @@ app.use(express.static(path.join(__dirname, "public")));
 
 const db = new sqlite3.Database("rolls.db");
 
+// ------------------------------------------------------------
+// INITIALISATION DES TABLES
+// ------------------------------------------------------------
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS auth (
@@ -48,13 +51,16 @@ db.serialize(() => {
     )
   `);
 
+  // Admin par défaut
   db.run(
     "INSERT OR IGNORE INTO auth(username, password) VALUES (?, ?)",
     ["admin", "admin"]
   );
 });
 
-// LOGIN utilisateur
+// ------------------------------------------------------------
+// LOGIN UTILISATEUR
+// ------------------------------------------------------------
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
 
@@ -68,7 +74,9 @@ app.post("/api/login", (req, res) => {
   );
 });
 
-// SCAN
+// ------------------------------------------------------------
+// SCAN ROLL
+// ------------------------------------------------------------
 app.post("/api/scan", (req, res) => {
   const { code } = req.body;
 
@@ -94,7 +102,9 @@ app.post("/api/scan", (req, res) => {
   });
 });
 
+// ------------------------------------------------------------
 // ASSIGNATION / DÉPLACEMENT
+// ------------------------------------------------------------
 app.post("/api/assign", (req, res) => {
   const { roll_id, emplacement, statut, userId } = req.body;
 
@@ -113,7 +123,9 @@ app.post("/api/assign", (req, res) => {
   );
 });
 
+// ------------------------------------------------------------
 // EMPLACEMENTS
+// ------------------------------------------------------------
 app.get("/api/emplacements", (req, res) => {
   db.all(
     "SELECT DISTINCT emplacement FROM rolls WHERE emplacement IS NOT NULL ORDER BY emplacement ASC",
@@ -122,7 +134,9 @@ app.get("/api/emplacements", (req, res) => {
   );
 });
 
+// ------------------------------------------------------------
 // RECHERCHE ROLL
+// ------------------------------------------------------------
 app.get("/api/recherche/:roll_id", (req, res) => {
   const roll_id = req.params.roll_id;
 
@@ -132,7 +146,9 @@ app.get("/api/recherche/:roll_id", (req, res) => {
   });
 });
 
+// ------------------------------------------------------------
 // HISTORIQUE COMPLET
+// ------------------------------------------------------------
 app.get("/api/historique", (req, res) => {
   const sql = `
     SELECT h.date, h.roll_id, h.emplacement, h.statut, u.nom AS utilisateur, h.action
@@ -143,7 +159,9 @@ app.get("/api/historique", (req, res) => {
   db.all(sql, [], (err, rows) => res.json({ historique: rows }));
 });
 
+// ------------------------------------------------------------
 // ALERTES
+// ------------------------------------------------------------
 app.get("/api/alertes", (req, res) => {
   const limite = new Date(Date.now() - 4 * 3600 * 1000)
     .toISOString()
@@ -161,7 +179,9 @@ app.get("/api/alertes", (req, res) => {
   db.all(sql, [limite], (err, rows) => res.json({ alertes: rows }));
 });
 
+// ------------------------------------------------------------
 // EXPORT HISTORIQUE CSV
+// ------------------------------------------------------------
 app.get("/api/export", (req, res) => {
   const sql = `
     SELECT h.date, h.roll_id, h.emplacement, h.statut, u.nom AS utilisateur, h.action
@@ -183,7 +203,9 @@ app.get("/api/export", (req, res) => {
   });
 });
 
+// ------------------------------------------------------------
 // ADMIN — LOGIN
+// ------------------------------------------------------------
 app.post("/api/admin/login", (req, res) => {
   const { username, password } = req.body;
 
@@ -197,14 +219,39 @@ app.post("/api/admin/login", (req, res) => {
   );
 });
 
+// ------------------------------------------------------------
 // ADMIN — LISTE UTILISATEURS
+// ------------------------------------------------------------
 app.get("/api/admin/listUsers", (req, res) => {
   db.all("SELECT id, username, password FROM auth ORDER BY username ASC", [], (err, rows) => {
     res.json({ users: rows });
   });
 });
 
-// ADMIN — EXPORT USERS (identifiants + mots de passe en clair)
+// ------------------------------------------------------------
+// ADMIN — AJOUT UTILISATEUR (CORRIGÉ)
+// ------------------------------------------------------------
+app.post("/api/admin/addUser", (req, res) => {
+  const { username, password } = req.body;
+
+  db.run(
+    "INSERT INTO auth(username, password) VALUES (?, ?)",
+    [username, password],
+    (err) => {
+      if (err) {
+        return res.json({
+          success: false,
+          error: "Utilisateur déjà existant"
+        });
+      }
+      res.json({ success: true });
+    }
+  );
+});
+
+// ------------------------------------------------------------
+// ADMIN — EXPORT USERS
+// ------------------------------------------------------------
 app.get("/api/admin/exportUsers", (req, res) => {
   db.all("SELECT username, password FROM auth ORDER BY username ASC", [], (err, rows) => {
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
@@ -219,7 +266,9 @@ app.get("/api/admin/exportUsers", (req, res) => {
   });
 });
 
-// ADMIN — SUPPRIMER UTILISATEUR
+// ------------------------------------------------------------
+// ADMIN — SUPPRESSION UTILISATEUR
+// ------------------------------------------------------------
 app.post("/api/admin/deleteUser", (req, res) => {
   const { id } = req.body;
 
@@ -229,7 +278,9 @@ app.post("/api/admin/deleteUser", (req, res) => {
   });
 });
 
+// ------------------------------------------------------------
 // ADMIN — MODIFIER MOT DE PASSE
+// ------------------------------------------------------------
 app.post("/api/admin/updatePassword", (req, res) => {
   const { id, password } = req.body;
 
@@ -239,6 +290,9 @@ app.post("/api/admin/updatePassword", (req, res) => {
   });
 });
 
+// ------------------------------------------------------------
+// LANCEMENT SERVEUR
+// ------------------------------------------------------------
 app.listen(PORT, () => {
   console.log("Serveur démarré sur le port " + PORT);
 });
