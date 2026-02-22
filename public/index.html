@@ -22,11 +22,15 @@
   <div id="login">
     <h2>Connexion</h2>
 
-    <label>Identifiant :</label>
-    <input type="text" id="loginUser" />
+    <div class="scanBox">
+      <input type="text" id="loginUser" placeholder="Identifiant">
+      <button class="scanBtn" onclick="lancerScanner('loginUser')">📷</button>
+    </div>
 
-    <label>Mot de passe :</label>
-    <input type="password" id="loginPass" />
+    <div class="scanBox">
+      <input type="password" id="loginPass" placeholder="Mot de passe">
+      <button class="scanBtn" onclick="lancerScanner('loginPass')">📷</button>
+    </div>
 
     <button id="btnLogin">Se connecter</button>
 
@@ -62,6 +66,7 @@
       <div class="scanBox">
         <input type="text" id="scan" placeholder="Scanner un code...">
         <button id="btnScanCamera" class="scanBtn">📷</button>
+        <button id="btnScanValidate" class="validateBtn">Valider</button>
       </div>
 
       <h3>Tableau des scans</h3>
@@ -71,6 +76,7 @@
             <th>Roll</th>
             <th>Emplacement</th>
             <th>Statut</th>
+            <th>Utilisateur</th>
             <th>Date</th>
           </tr>
         </thead>
@@ -84,6 +90,7 @@
             <th>Date</th>
             <th>Emplacement</th>
             <th>Statut</th>
+            <th>Utilisateur</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -103,7 +110,11 @@
           <p>Dernier roll scanné : <b id="lastRoll"></b></p>
 
           <div class="searchBox">
-            <input type="text" id="searchEmplacements" placeholder="Rechercher un roll...">
+            <div class="scanBox">
+              <input type="text" id="searchEmplacements" placeholder="Rechercher un roll...">
+              <button class="scanBtn" onclick="lancerScanner('searchEmplacements')">📷</button>
+            </div>
+
             <select id="filterStatutEmpl">
               <option value="">Tous statuts</option>
               <option>Arrivé</option>
@@ -112,7 +123,12 @@
               <option>En attente</option>
               <option>Expédié</option>
             </select>
-            <input type="text" id="filterEmplacementEmpl" placeholder="Filtrer par emplacement">
+
+            <div class="scanBox">
+              <input type="text" id="filterEmplacementEmpl" placeholder="Filtrer par emplacement">
+              <button class="scanBtn" onclick="lancerScanner('filterEmplacementEmpl')">📷</button>
+            </div>
+
             <button id="clearSearchEmpl">Effacer</button>
           </div>
 
@@ -138,11 +154,14 @@
           <label>Roll :</label>
           <div class="scanBox">
             <input type="text" id="panelRoll">
-            <button id="btnScanRoll" class="scanBtn">📷</button>
+            <button class="scanBtn" onclick="lancerScanner('panelRoll')">📷</button>
           </div>
 
           <label>Emplacement :</label>
-          <input type="text" id="panelEmplacement">
+          <div class="scanBox">
+            <input type="text" id="panelEmplacement">
+            <button class="scanBtn" onclick="lancerScanner('panelEmplacement')">📷</button>
+          </div>
 
           <label>Statut :</label>
           <select id="panelStatut">
@@ -165,7 +184,12 @@
       <h2>Historique complet</h2>
 
       <div class="searchBox">
-        <input type="text" id="searchHistorique" placeholder="Rechercher un roll...">
+
+        <div class="scanBox">
+          <input type="text" id="searchHistorique" placeholder="Rechercher un roll...">
+          <button class="scanBtn" onclick="lancerScanner('searchHistorique')">📷</button>
+        </div>
+
         <select id="filterStatutHist">
           <option value="">Tous statuts</option>
           <option>Arrivé</option>
@@ -174,7 +198,12 @@
           <option>En attente</option>
           <option>Expédié</option>
         </select>
-        <input type="text" id="filterEmplacementHist" placeholder="Filtrer par emplacement">
+
+        <div class="scanBox">
+          <input type="text" id="filterEmplacementHist" placeholder="Filtrer par emplacement">
+          <button class="scanBtn" onclick="lancerScanner('filterEmplacementHist')">📷</button>
+        </div>
+
         <button id="clearSearchHist">Effacer</button>
       </div>
 
@@ -185,6 +214,7 @@
             <th>Roll</th>
             <th>Emplacement</th>
             <th>Statut</th>
+            <th>Utilisateur</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -197,8 +227,17 @@
       <h2>Administration</h2>
 
       <h3>Ajouter un utilisateur</h3>
-      <input type="text" id="newUser" placeholder="Nom utilisateur" />
-      <input type="password" id="newPass" placeholder="Mot de passe" />
+
+      <div class="scanBox">
+        <input type="text" id="newUser" placeholder="Nom utilisateur">
+        <button class="scanBtn" onclick="lancerScanner('newUser')">📷</button>
+      </div>
+
+      <div class="scanBox">
+        <input type="password" id="newPass" placeholder="Mot de passe">
+        <button class="scanBtn" onclick="lancerScanner('newPass')">📷</button>
+      </div>
+
       <button id="btnAddUser">Ajouter</button>
 
       <h3>Liste des utilisateurs</h3>
