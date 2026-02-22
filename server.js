@@ -64,10 +64,22 @@ function getOrCreateUser(nom, cb) {
   });
 }
 
-// Login utilisateur simple (par nom)
+// Login utilisateur (par nom et mot de passe)
 app.post("/api/login", (req, res) => {
-  const { nom } = req.body;
-  if (!nom) return res.status(400).json({ error: "Nom requis" });
+  const { username, password } = req.body;
+
+  db.get(
+    "SELECT id FROM auth WHERE username = ? AND password = ?",
+    [username, password],
+    (err, row) => {
+      if (err) return res.json({ success: false, error: "Erreur serveur" });
+      if (!row) return res.json({ success: false });
+
+      res.json({ success: true, userId: row.id });
+    }
+  );
+});
+
 
   getOrCreateUser(nom, (err, id) => {
     if (err) return res.status(500).json({ error: "Erreur serveur" });
@@ -254,3 +266,4 @@ app.post("/api/admin/addUser", (req, res) => {
 app.listen(PORT, () => {
   console.log("Serveur démarré sur le port " + PORT);
 });
+
