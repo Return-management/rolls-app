@@ -25,6 +25,7 @@ db.serialize(() => {
     )
   `);
 
+  // Création automatique de l’admin
   db.run(
     "INSERT OR IGNORE INTO auth(username, password, isAdmin) VALUES (?, ?, ?)",
     ["admin", "admin", 1]
@@ -74,7 +75,7 @@ app.post("/api/login", (req, res) => {
 });
 
 // ------------------------------------------------------------
-// ADMIN
+// ADMIN : AJOUT UTILISATEUR
 // ------------------------------------------------------------
 app.post("/api/admin/addUser", (req, res) => {
   const { username, password } = req.body;
@@ -92,6 +93,9 @@ app.post("/api/admin/addUser", (req, res) => {
   );
 });
 
+// ------------------------------------------------------------
+// ADMIN : LISTE UTILISATEURS
+// ------------------------------------------------------------
 app.get("/api/admin/listUsers", (req, res) => {
   db.all("SELECT id, username, password, isAdmin FROM auth ORDER BY username ASC", [], (err, rows) => {
     if (err) return res.json({ success: false });
@@ -99,6 +103,9 @@ app.get("/api/admin/listUsers", (req, res) => {
   });
 });
 
+// ------------------------------------------------------------
+// ADMIN : SUPPRESSION UTILISATEUR
+// ------------------------------------------------------------
 app.post("/api/admin/deleteUser", (req, res) => {
   const { id } = req.body;
 
@@ -108,6 +115,9 @@ app.post("/api/admin/deleteUser", (req, res) => {
   });
 });
 
+// ------------------------------------------------------------
+// ADMIN : MODIFICATION MOT DE PASSE
+// ------------------------------------------------------------
 app.post("/api/admin/updatePassword", (req, res) => {
   const { id, password } = req.body;
 
@@ -185,7 +195,7 @@ app.post("/api/assign", (req, res) => {
 // ------------------------------------------------------------
 app.get("/api/emplacements", (req, res) => {
   db.all(
-    "SELECT DISTINCT emplacement FROM rolls WHERE emplacement IS NOT NULL AND emplacement <> '' ORDER BY emplacement ASC",
+    "SELECT roll_id, emplacement, statut FROM rolls ORDER BY emplacement ASC",
     [],
     (err, rows) => {
       if (err) return res.status(500).json({ error: "Erreur DB" });
@@ -195,7 +205,7 @@ app.get("/api/emplacements", (req, res) => {
 });
 
 // ------------------------------------------------------------
-// HISTORIQUE
+// HISTORIQUE COMPLET
 // ------------------------------------------------------------
 app.get("/api/historique", (req, res) => {
   const sql = `
