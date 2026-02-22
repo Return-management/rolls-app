@@ -3,33 +3,12 @@
 // ---------------------------
 let userId = null;
 let isAdmin = false;
-let scans = []; // stockage des scans
-
-// DOM
-const loginDiv = document.getElementById("login");
-const appDiv = document.getElementById("app");
-
-const loginUser = document.getElementById("loginUser");
-const loginPass = document.getElementById("loginPass");
-const btnLogin = document.getElementById("btnLogin");
-const loginError = document.getElementById("loginError");
-
-const currentUser = document.getElementById("currentUser");
-
-const btnPageScan = document.getElementById("btnPageScan");
-const btnEmplacements = document.getElementById("btnEmplacements");
-const btnHistorique = document.getElementById("btnHistorique");
-const btnAdmin = document.getElementById("btnAdmin");
-
-const pageScan = document.getElementById("pageScan");
-const pageEmplacements = document.getElementById("pageEmplacements");
-const pageHistorique = document.getElementById("pageHistorique");
-const pageAdmin = document.getElementById("pageAdmin");
+let scans = [];
 
 // ---------------------------
 // CONNEXION
 // ---------------------------
-btnLogin.addEventListener("click", login);
+document.getElementById("btnLogin").addEventListener("click", login);
 
 async function login() {
   const username = loginUser.value.trim();
@@ -107,7 +86,7 @@ document.getElementById("scan").addEventListener("keydown", (e) => {
 });
 
 async function traiterScan() {
-  const code = document.getElementById("scan").value.trim();
+  const code = scan.value.trim();
   if (!code) return;
 
   const res = await fetch("/api/scan", {
@@ -118,7 +97,6 @@ async function traiterScan() {
 
   const data = await res.json();
 
-  // afficher le roll dans la page Emplacements
   document.getElementById("lastRoll").textContent = code;
 
   if (data.type === "new_roll") {
@@ -127,21 +105,20 @@ async function traiterScan() {
   }
 
   if (data.type === "existing_roll") {
-    document.getElementById("historique").textContent =
-      JSON.stringify(data.historique, null, 2);
+    remplirTableauHistoriqueScan(data.historique);
 
     const emplacement = prompt("Modifier l’emplacement du roll ?");
     if (emplacement) await assignerRoll(code, emplacement);
   }
 
-  document.getElementById("scan").value = "";
+  scan.value = "";
 }
 
 // ---------------------------
 // ASSIGNATION
 // ---------------------------
 async function assignerRoll(roll_id, emplacement) {
-  const statut = document.getElementById("statut").value;
+  const statut = statutSelect.value;
 
   const res = await fetch("/api/assign", {
     method: "POST",
@@ -183,14 +160,43 @@ function ajouterScanTableau(roll, emplacement, statut) {
 }
 
 // ---------------------------
+// HISTORIQUE DU ROLL SCANNÉ
+// ---------------------------
+function remplirTableauHistoriqueScan(historique) {
+  const tbody = document.querySelector("#tableHistoriqueScan tbody");
+  tbody.innerHTML = "";
+
+  historique.forEach(h => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${h.date}</td>
+      <td>${h.emplacement}</td>
+      <td>${h.statut}</td>
+      <td>${h.action}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ---------------------------
 // EMPLACEMENTS
 // ---------------------------
 async function chargerEmplacements() {
   const res = await fetch("/api/emplacements");
   const data = await res.json();
 
-  document.getElementById("listeEmplacements").textContent =
-    JSON.stringify(data.emplacements, null, 2);
+  const tbody = document.querySelector("#tableEmplacements tbody");
+  tbody.innerHTML = "";
+
+  data.emplacements.forEach(e => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${e.roll_id || ""}</td>
+      <td>${e.emplacement}</td>
+      <td>${e.statut || ""}</td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
 // ---------------------------
@@ -200,8 +206,20 @@ async function chargerHistorique() {
   const res = await fetch("/api/historique");
   const data = await res.json();
 
-  document.getElementById("listeHistorique").textContent =
-    JSON.stringify(data.historique, null, 2);
+  const tbody = document.querySelector("#tableHistorique tbody");
+  tbody.innerHTML = "";
+
+  data.historique.forEach(h => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${h.date}</td>
+      <td>${h.roll_id}</td>
+      <td>${h.emplacement}</td>
+      <td>${h.statut}</td>
+      <td>${h.action}</td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
 // ---------------------------
@@ -230,8 +248,8 @@ async function chargerUtilisateurs() {
 }
 
 document.getElementById("btnAddUser").addEventListener("click", async () => {
-  const username = document.getElementById("newUser").value.trim();
-  const password = document.getElementById("newPass").value.trim();
+  const username = newUser.value.trim();
+  const password = newPass.value.trim();
 
   const res = await fetch("/api/admin/addUser", {
     method: "POST",
@@ -247,8 +265,8 @@ document.getElementById("btnAddUser").addEventListener("click", async () => {
   }
 
   adminInfo.textContent = "Utilisateur ajouté.";
-  document.getElementById("newUser").value = "";
-  document.getElementById("newPass").value = "";
+  newUser.value = "";
+  newPass.value = "";
 
   chargerUtilisateurs();
 });
@@ -264,12 +282,12 @@ async function deleteUser(id) {
 }
 
 async function updatePassword(id) {
-  const newPass = document.getElementById("pass_" + id).value;
+  const newPassValue = document.getElementById("pass_" + id).value;
 
   await fetch("/api/admin/updatePassword", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id, password: newPass })
+    body: JSON.stringify({ id, password: newPassValue })
   });
 
   chargerUtilisateurs();
