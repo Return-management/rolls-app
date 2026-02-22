@@ -110,7 +110,7 @@ input, select {
 /* ------------------------------
    CARTES / BLOCS
 ------------------------------ */
-.bloc, #pageAdmin, #pageScan, #pageEmplacements, #pageHistorique {
+.bloc {
   background: white;
   padding: 20px;
   border-radius: 8px;
@@ -161,4 +161,22 @@ pre {
 #emplacementsRight {
   flex: 1;
   height: fit-content;
+}
+
+/* ------------------------------
+   SCAN BUTTON
+------------------------------ */
+.scanBox {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.scanBtn {
+  background: #1e88e5;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 18px;
 }
