@@ -416,7 +416,7 @@ async function enregistrerEmplacement() {
 
   // 👉 Autoriser un emplacement sans roll
   if (!roll) {
-    roll = "EMPTY-" + Date.now();
+    roll = "Libre";
   }
 
   let res = await fetch("/api/assign", {
@@ -462,3 +462,4 @@ async function enregistrerEmplacement() {
     document.getElementById("panelStatut").value = "Arrivé";
   }
 }
+
