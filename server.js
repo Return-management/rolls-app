@@ -25,7 +25,7 @@ db.serialize(() => {
     )
   `);
 
-  // Création admin par défaut
+  // Admin par défaut
   db.run(
     "INSERT OR IGNORE INTO auth(username, password, isAdmin) VALUES (?, ?, ?)",
     ["admin", "admin", 1]
