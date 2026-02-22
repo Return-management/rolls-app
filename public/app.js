@@ -130,7 +130,141 @@ function showAdmin() {
   pageAdmin.style.display = "block";
   chargerUtilisateurs();
 }
-;
+
+/* ============================================================
+   SCAN ROLL — BOUTON VALIDER + ENTER
+============================================================ */
+
+// Bouton Valider
+document.getElementById("btnScanValidate").onclick = traiterScan;
+
+// Touche Entrée
+document.getElementById("scan").addEventListener("keydown", e => {
+  if (e.key === "Enter") traiterScan();
+});
+/* ============================================================
+   TRAITEMENT DU SCAN
+============================================================ */
+async function traiterScan() {
+  const code = scan.value.trim();
+  if (!code) return;
+
+  const res = await fetch("/api/scan", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code })
+  });
+
+  const data = await res.json();
+
+  lastRoll.textContent = code;
+
+  /* --- Si le roll existe déjà → afficher emplacement actuel + possibilité d'annuler --- */
+  if (data.type === "existing_roll" && data.historique.length > 0) {
+    const last = data.historique[data.historique.length - 1];
+
+    const ok = confirm(
+      `⚠ Ce roll est déjà enregistré à l’emplacement : ${last.emplacement}\n\n` +
+      `Voulez-vous modifier son emplacement ?`
+    );
+
+    remplirTableauHistoriqueScan(data.historique);
+
+    if (!ok) {
+      scan.value = "";
+      return; // ANNULATION PROPRE
+    }
+  }
+
+  /* --- Ouvrir la fenêtre d’emplacement --- */
+  const modal = document.getElementById("modalEmplacement");
+  const inputEmpl = document.getElementById("modalEmplInput");
+  const btnValider = document.getElementById("modalEmplValider");
+
+  modal.style.display = "flex";
+  inputEmpl.value = "";
+
+  btnValider.onclick = async () => {
+    const emplacement = inputEmpl.value.trim();
+    modal.style.display = "none";
+    await assignerRoll(code, emplacement);
+  };
+
+  scan.value = "";
+}
+
+/* ============================================================
+   ASSIGNATION ROLL → EMPLACEMENT
+============================================================ */
+async function assignerRoll(roll_id, emplacement) {
+  const statutValue = document.getElementById("statut").value;
+
+  let res = await fetch("/api/assign", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      roll_id,
+      emplacement,
+      statut: statutValue,
+      userId,
+      force: false
+    })
+  });
+
+  let data = await res.json();
+
+  /* --- Emplacement déjà occupé → confirmation --- */
+  if (data.conflict) {
+    const ok = confirm(
+      `⚠ L’emplacement "${emplacement}" est déjà occupé par le roll "${data.existingRoll}".\nVoulez-vous le remplacer ?`
+    );
+
+    if (!ok) return;
+
+    res = await fetch("/api/assign", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        roll_id,
+        emplacement,
+        statut: statutValue,
+        userId,
+        force: true
+      })
+    });
+
+    data = await res.json();
+  }
+
+  if (data.success) {
+    ajouterScanTableau(roll_id, emplacement, statutValue);
+    chargerEmplacements();
+  }
+}
+
+/* ============================================================
+   TABLEAU DES SCANS
+============================================================ */
+function ajouterScanTableau(roll, emplacement, statut) {
+  const date = new Date().toLocaleString();
+  const username = currentUser.textContent;
+
+  scans.push({ roll, emplacement, statut, date, username });
+
+  const tbody = tableScans.querySelector("tbody");
+  const tr = document.createElement("tr");
+
+  tr.innerHTML = `
+    <td>${roll}</td>
+    <td>${emplacement}</td>
+    <td>${statut}</td>
+    <td>${username}</td>
+    <td>${date}</td>
+  `;
+
+  tbody.appendChild(tr);
+}
+
 /* ============================================================
    HISTORIQUE DU ROLL
 ============================================================ */
@@ -285,137 +419,6 @@ document.getElementById("btnExportUsers").addEventListener("click", () => {
 });
 
 /* ============================================================
-   FILTRES TABLEAUX
-============================================================ */
-function filtrerTableauAvance(options) {
-  const { tableId, rollIndex, statutIndex, emplacementIndex, searchId, statutId, emplacementId } = options;
-
-  const search = document.getElementById(searchId).value.toLowerCase();
-  const statut = document.getElementById(statutId).value.toLowerCase();
-  const emplacement = document.getElementById(emplacementId).value.toLowerCase();
-
-  const lignes = document.querySelectorAll(`#${tableId} tbody tr`);
-
-  lignes.forEach(tr => {
-    const rollVal = tr.children[rollIndex].textContent.toLowerCase();
-    const statutVal = tr.children[statutIndex].textContent.toLowerCase();
-    const emplacementVal = tr.children[emplacementIndex].textContent.toLowerCase();
-
-    const matchRoll = rollVal.includes(search);
-    const matchStatut = statut === "" || statutVal.includes(statut);
-    const matchEmpl = emplacement === "" || emplacementVal.includes(emplacement);
-
-    tr.style.display = (matchRoll && matchStatut && matchEmpl) ? "" : "none";
-  });
-}
-
-function activerFiltresEmplacements() {
-  const options = {
-    tableId: "tableEmplacements",
-    rollIndex: 1,
-    statutIndex: 2,
-    emplacementIndex: 0,
-    searchId: "searchEmplacements",
-    statutId: "filterStatutEmpl",
-    emplacementId: "filterEmplacementEmpl"
-  };
-
-  searchEmplacements.addEventListener("input", () => filtrerTableauAvance(options));
-  filterStatutEmpl.addEventListener("change", () => filtrerTableauAvance(options));
-  filterEmplacementEmpl.addEventListener("input", () => filtrerTableauAvance(options));
-
-  clearSearchEmpl.addEventListener("click", () => {
-    searchEmplacements.value = "";
-    filterStatutEmpl.value = "";
-    filterEmplacementEmpl.value = "";
-    filtrerTableauAvance(options);
-  });
-}
-
-function activerFiltresHistorique() {
-  const options = {
-    tableId: "tableHistorique",
-    rollIndex: 1,
-    statutIndex: 3,
-    emplacementIndex: 2,
-    searchId: "searchHistorique",
-    statutId: "filterStatutHist",
-    emplacementId: "filterEmplacementHist"
-  };
-
-  searchHistorique.addEventListener("input", () => filtrerTableauAvance(options));
-  filterStatutHist.addEventListener("change", () => filtrerTableauAvance(options));
-  filterEmplacementHist.addEventListener("input", () => filtrerTableauAvance(options));
-
-  clearSearchHist.addEventListener("click", () => {
-    searchHistorique.value = "";
-    filterStatutHist.value = "";
-    filterEmplacementHist.value = "";
-    filtrerTableauAvance(options);
-  });
-}
-
-/* ============================================================
-   FORMULAIRE MANUEL
-============================================================ */
-document.getElementById("btnSavePanel").addEventListener("click", enregistrerEmplacement);
-
-async function enregistrerEmplacement() {
-  let roll = panelRoll.value.trim();
-  const emplacement = panelEmplacement.value.trim();
-  let statut = panelStatut.value;
-
-  if (!roll) {
-    const ok = confirm("Aucun roll renseigné. Enregistrer quand même ?");
-    if (!ok) return;
-    roll = "EMPTY-" + Date.now();
-    statut = "";
-  }
-
-  let res = await fetch("/api/assign", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      roll_id: roll,
-      emplacement,
-      statut,
-      userId,
-      force: false
-    })
-  });
-
-  let data = await res.json();
-
-  if (data.conflict) {
-    const ok = confirm(
-      `⚠ L’emplacement "${emplacement}" contient déjà le roll "${data.existingRoll}". Voulez-vous l’écraser ?`
-    );
-    if (!ok) return;
-
-    res = await fetch("/api/assign", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        roll_id: roll,
-        emplacement,
-        statut,
-        userId,
-        force: true
-      })
-    });
-
-    data = await res.json();
-  }
-
-  if (data.success) {
-    chargerEmplacements();
-    panelRoll.value = "";
-    panelEmplacement.value = "";
-    panelStatut.value = "Arrivé";
-  }
-}
-
-/* ============================================================
    SCANNER ZXING — TOUJOURS DEVANT
 ============================================================ */
 async function lancerScanner(targetInputId) {
@@ -467,4 +470,3 @@ function fermerScanner() {
 }
 
 document.getElementById("closeScanner").addEventListener("click", fermerScanner);
-
