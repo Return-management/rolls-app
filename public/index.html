@@ -86,6 +86,21 @@
 
       <p>Dernier roll scanné : <b id="lastRoll"></b></p>
 
+      <!-- 🔍 BARRE DE RECHERCHE AVANCÉE -->
+      <div class="searchBox">
+        <input type="text" id="searchEmplacements" placeholder="Rechercher un roll...">
+        <select id="filterStatutEmpl">
+          <option value="">Tous statuts</option>
+          <option>Arrivé</option>
+          <option>En tri</option>
+          <option>En préparation</option>
+          <option>En attente</option>
+          <option>Expédié</option>
+        </select>
+        <input type="text" id="filterEmplacementEmpl" placeholder="Filtrer par emplacement">
+        <button id="clearSearchEmpl">Effacer</button>
+      </div>
+
       <table id="tableEmplacements" class="table">
         <thead>
           <tr>
@@ -101,6 +116,21 @@
     <!-- PAGE HISTORIQUE COMPLET -->
     <div id="pageHistorique" class="bloc" style="display:none;">
       <h2>Historique complet</h2>
+
+      <!-- 🔍 BARRE DE RECHERCHE AVANCÉE -->
+      <div class="searchBox">
+        <input type="text" id="searchHistorique" placeholder="Rechercher un roll...">
+        <select id="filterStatutHist">
+          <option value="">Tous statuts</option>
+          <option>Arrivé</option>
+          <option>En tri</option>
+          <option>En préparation</option>
+          <option>En attente</option>
+          <option>Expédié</option>
+        </select>
+        <input type="text" id="filterEmplacementHist" placeholder="Filtrer par emplacement">
+        <button id="clearSearchHist">Effacer</button>
+      </div>
 
       <table id="tableHistorique" class="table">
         <thead>
@@ -144,4 +174,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
