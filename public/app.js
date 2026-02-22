@@ -111,16 +111,18 @@ function showScan() {
   pageScan.style.display = "block";
 }
 
-function showEmplacements() {
+async function showEmplacements() {
   hideAllPages();
   pageEmplacements.style.display = "block";
+  await chargerUsersCache();
   chargerEmplacements();
   activerFiltresEmplacements();
 }
 
-function showHistorique() {
+async function showHistorique() {
   hideAllPages();
   pageHistorique.style.display = "block";
+  await chargerUsersCache();   // IMPORTANT pour éviter "inconnu"
   chargerHistorique();
   activerFiltresHistorique();
 }
@@ -134,11 +136,8 @@ function showAdmin() {
 /* ============================================================
    SCAN ROLL — BOUTON VALIDER + ENTER
 ============================================================ */
-
-// Bouton Valider
 document.getElementById("btnScanValidate").onclick = traiterScan;
 
-// Touche Entrée
 document.getElementById("scan").addEventListener("keydown", e => {
   if (e.key === "Enter") traiterScan();
 });
@@ -312,7 +311,6 @@ async function chargerEmplacements() {
     tbody.appendChild(tr);
   });
 }
-
 /* ============================================================
    HISTORIQUE COMPLET
 ============================================================ */
@@ -419,16 +417,113 @@ document.getElementById("btnExportUsers").addEventListener("click", () => {
 });
 
 /* ============================================================
+   FILTRES TABLEAUX
+============================================================ */
+function filtrerTableauAvance(options) {
+  const { tableId, rollIndex, statutIndex, emplacementIndex, searchId, statutId, emplacementId } = options;
+
+  const search = document.getElementById(searchId).value.toLowerCase();
+  const statut = document.getElementById(statutId).value.toLowerCase();
+  const emplacement = document.getElementById(emplacementId).value.toLowerCase();
+
+  const lignes = document.querySelectorAll(`#${tableId} tbody tr`);
+
+  lignes.forEach(tr => {
+    const rollVal = tr.children[rollIndex].textContent.toLowerCase();
+    const statutVal = tr.children[statutIndex].textContent.toLowerCase();
+    const emplacementVal = tr.children[emplacementIndex].textContent.toLowerCase();
+
+    const matchRoll = rollVal.includes(search);
+    const matchStatut = statut === "" || statutVal.includes(statut);
+    const matchEmpl = emplacement === "" || emplacementVal.includes(emplacement);
+
+    tr.style.display = (matchRoll && matchStatut && matchEmpl) ? "" : "none";
+  });
+}
+
+function activerFiltresEmplacements() {
+  const options = {
+    tableId: "tableEmplacements",
+    rollIndex: 1,
+    statutIndex: 2,
+    emplacementIndex: 0,
+    searchId: "searchEmplacements",
+    statutId: "filterStatutEmpl",
+    emplacementId: "filterEmplacementEmpl"
+  };
+
+  searchEmplacements.addEventListener("input", () => filtrerTableauAvance(options));
+  filterStatutEmpl.addEventListener("change", () => filtrerTableauAvance(options));
+  filterEmplacementEmpl.addEventListener("input", () => filtrerTableauAvance(options));
+
+  clearSearchEmpl.addEventListener("click", () => {
+    searchEmplacements.value = "";
+    filterStatutEmpl.value = "";
+    filterEmplacementEmpl.value = "";
+    filtrerTableauAvance(options);
+  });
+}
+
+function activerFiltresHistorique() {
+  const options = {
+    tableId: "tableHistorique",
+    rollIndex: 1,
+    statutIndex: 3,
+    emplacementIndex: 2,
+    searchId: "searchHistorique",
+    statutId: "filterStatutHist",
+    emplacementId: "filterEmplacementHist"
+  };
+
+  searchHistorique.addEventListener("input", () => filtrerTableauAvance(options));
+  filterStatutHist.addEventListener("change", () => filtrerTableauAvance(options));
+  filterEmplacementHist.addEventListener("input", () => filtrerTableauAvance(options));
+
+  clearSearchHist.addEventListener("click", () => {
+    searchHistorique.value = "";
+    filterStatutHist.value = "";
+    filterEmplacementHist.value = "";
+    filtrerTableauAvance(options);
+  });
+}
+
+/* ============================================================
+   EXPORT EMPLACEMENTS
+============================================================ */
+document.getElementById("btnExportEmplacements").addEventListener("click", exporterEmplacements);
+
+function exporterEmplacements() {
+  const rows = [["Emplacement", "Roll", "Statut", "Utilisateur"]];
+
+  const trs = document.querySelectorAll("#tableEmplacements tbody tr");
+
+  trs.forEach(tr => {
+    const cols = [...tr.children].map(td => td.textContent);
+    rows.push(cols);
+  });
+
+  let csv = rows.map(r => r.join(";")).join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "emplacements.csv";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+/* ============================================================
    SCANNER ZXING — TOUJOURS DEVANT
 ============================================================ */
 async function lancerScanner(targetInputId) {
 
-  // Si la fenêtre d’emplacement est ouverte → la cacher temporairement
   const modalEmpl = document.getElementById("modalEmplacement");
   const wasModalOpen = modalEmpl.style.display === "flex";
   if (wasModalOpen) modalEmpl.style.display = "none";
 
-  // Ouvrir le scanner
   document.getElementById("scannerModal").style.display = "flex";
 
   try {
@@ -448,7 +543,6 @@ async function lancerScanner(targetInputId) {
         const input = document.getElementById(targetInputId);
         if (input) input.value = result.text;
 
-        // Réafficher la fenêtre d’emplacement si elle était ouverte
         if (wasModalOpen) modalEmpl.style.display = "flex";
       }
     });
