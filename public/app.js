@@ -205,6 +205,8 @@ btnEmplacements.addEventListener("click", async () => {
 scanRecherche.addEventListener("keydown", async (e) => {
   if (e.key !== "Enter") return;
 
+  document.getElementById("dernierScan").textContent = code;
+
   const code = scanRecherche.value.trim();
   scanRecherche.value = "";
   if (!code) return;
@@ -290,5 +292,6 @@ btnAddUser.addEventListener("click", async () => {
     adminInfo.textContent = "Erreur : " + (data.error || "inconnue");
   }
 });
+
 
 
