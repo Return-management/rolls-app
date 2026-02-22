@@ -120,12 +120,54 @@ async function traiterScan() {
 
   document.getElementById("info").textContent = JSON.stringify(data, null, 2);
 
+  // Nouveau roll → demander emplacement
+  if (data.type === "new_roll") {
+    const emplacement = prompt("Nouveau roll détecté. Entrez l’emplacement :");
+
+    if (emplacement) {
+      await assignerRoll(code, emplacement);
+    }
+  }
+
+  // Roll existant → afficher historique + possibilité de modifier emplacement
   if (data.type === "existing_roll") {
     document.getElementById("historique").textContent =
       JSON.stringify(data.historique, null, 2);
+
+    const emplacement = prompt("Modifier l’emplacement du roll ? (laisser vide pour ignorer)");
+
+    if (emplacement) {
+      await assignerRoll(code, emplacement);
+    }
   }
 
   document.getElementById("scan").value = "";
+}
+
+// ---------------------------
+// ASSIGNATION DU ROLL
+// ---------------------------
+async function assignerRoll(roll_id, emplacement) {
+  const statut = document.getElementById("statut").value;
+
+  const res = await fetch("/api/assign", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      roll_id,
+      emplacement,
+      statut,
+      userId
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    document.getElementById("info").textContent = "Roll enregistré.";
+  } else {
+    document.getElementById("info").textContent = "Erreur lors de l’enregistrement.";
+  }
 }
 
 // ---------------------------
