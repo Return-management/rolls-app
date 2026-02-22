@@ -4,7 +4,7 @@
 let userId = null;
 let isAdmin = false;
 let scans = [];
-let usersCache = {}; 
+let usersCache = {};
 let inactivityTimer = null;
 let scannerStream = null;
 let codeReader = new ZXing.BrowserMultiFormatReader();
@@ -143,6 +143,8 @@ document.getElementById("scan").addEventListener("keydown", (e) => {
   if (e.key === "Enter") traiterScan();
 });
 
+document.getElementById("btnScanValidate").addEventListener("click", traiterScan);
+
 async function traiterScan() {
   const code = scan.value.trim();
   if (!code) return;
@@ -225,8 +227,9 @@ async function assignerRoll(roll_id, emplacement) {
 // ---------------------------
 function ajouterScanTableau(roll, emplacement, statut) {
   const date = new Date().toLocaleString();
+  const username = currentUser.textContent || "";
 
-  scans.push({ roll, emplacement, statut, date });
+  scans.push({ roll, emplacement, statut, date, username });
 
   const tbody = document.querySelector("#tableScans tbody");
   const tr = document.createElement("tr");
@@ -235,6 +238,7 @@ function ajouterScanTableau(roll, emplacement, statut) {
     <td>${roll}</td>
     <td>${emplacement}</td>
     <td>${statut}</td>
+    <td>${username}</td>
     <td>${date}</td>
   `;
 
@@ -249,11 +253,13 @@ function remplirTableauHistoriqueScan(historique) {
   tbody.innerHTML = "";
 
   historique.forEach(h => {
+    const username = h.username || usersCache[h.user_id] || "";
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${h.date}</td>
       <td>${h.emplacement}</td>
       <td>${h.statut}</td>
+      <td>${username}</td>
       <td>${h.action}</td>
     `;
     tbody.appendChild(tr);
@@ -295,12 +301,14 @@ async function chargerHistorique() {
   tbody.innerHTML = "";
 
   data.historique.forEach(h => {
+    const username = h.username || usersCache[h.user_id] || "";
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${h.date}</td>
       <td>${h.roll_id}</td>
       <td>${h.emplacement}</td>
       <td>${h.statut}</td>
+      <td>${username}</td>
       <td>${h.action}</td>
     `;
     tbody.appendChild(tr);
@@ -323,7 +331,10 @@ async function chargerUtilisateurs() {
 
     div.innerHTML = `
       <b>${u.username}</b>
-      <input type="password" id="pass_${u.id}" value="${u.password}">
+      <div class="scanBox">
+        <input type="password" id="pass_${u.id}" value="${u.password}">
+        <button class="scanBtn" onclick="lancerScanner('pass_${u.id}')">📷</button>
+      </div>
       <button onclick="updatePassword(${u.id})">Modifier</button>
       <button onclick="deleteUser(${u.id})">Supprimer</button>
     `;
@@ -543,7 +554,8 @@ async function lancerScanner(targetInputId) {
     codeReader.decodeFromVideoDevice(null, "scannerVideo", (result, err) => {
       if (result) {
         fermerScanner();
-        document.getElementById(targetInputId).value = result.text;
+        const input = document.getElementById(targetInputId);
+        if (input) input.value = result.text;
       }
     });
 
