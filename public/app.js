@@ -106,38 +106,64 @@ async function traiterScan() {
   document.getElementById("lastRoll").textContent = code;
 
   if (data.type === "new_roll") {
-    const emplacement = prompt("Nouveau roll détecté. Entrez l’emplacement :");
-    if (emplacement) await assignerRoll(code, emplacement);
+    const emplacement = prompt("Nouveau roll détecté. Entrez l’emplacement (laisser vide possible) :");
+    if (emplacement !== null) await assignerRoll(code, emplacement);
   }
 
   if (data.type === "existing_roll") {
     remplirTableauHistoriqueScan(data.historique);
 
-    const emplacement = prompt("Modifier l’emplacement du roll ?");
-    if (emplacement) await assignerRoll(code, emplacement);
+    const emplacement = prompt("Modifier l’emplacement du roll (laisser vide possible) ?");
+    if (emplacement !== null) await assignerRoll(code, emplacement);
   }
 
   scan.value = "";
 }
 
 // ---------------------------
-// ASSIGNATION
+// ASSIGNATION AVEC GESTION DES CONFLITS
 // ---------------------------
 async function assignerRoll(roll_id, emplacement) {
   const statut = document.getElementById("statut").value;
 
-  const res = await fetch("/api/assign", {
+  // 1) Tentative normale
+  let res = await fetch("/api/assign", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       roll_id,
       emplacement,
       statut,
-      userId
+      userId,
+      force: false
     })
   });
 
-  const data = await res.json();
+  let data = await res.json();
+
+  // 2) Conflit détecté
+  if (data.conflict) {
+    const confirmReplace = confirm(
+      `⚠ L’emplacement "${emplacement}" contient déjà le roll "${data.existingRoll}".\nVoulez-vous l’écraser ?`
+    );
+
+    if (!confirmReplace) return;
+
+    // 3) Écrasement forcé
+    res = await fetch("/api/assign", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        roll_id,
+        emplacement,
+        statut,
+        userId,
+        force: true
+      })
+    });
+
+    data = await res.json();
+  }
 
   if (data.success) {
     ajouterScanTableau(roll_id, emplacement, statut);
