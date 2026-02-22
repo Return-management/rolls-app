@@ -229,7 +229,7 @@ app.get("/api/admin/listUsers", (req, res) => {
 });
 
 // ------------------------------------------------------------
-// ADMIN — AJOUT UTILISATEUR (CORRIGÉ)
+// ADMIN — AJOUT UTILISATEUR
 // ------------------------------------------------------------
 app.post("/api/admin/addUser", (req, res) => {
   const { username, password } = req.body;
@@ -247,23 +247,6 @@ app.post("/api/admin/addUser", (req, res) => {
       res.json({ success: true });
     }
   );
-});
-
-// ------------------------------------------------------------
-// ADMIN — EXPORT USERS
-// ------------------------------------------------------------
-app.get("/api/admin/exportUsers", (req, res) => {
-  db.all("SELECT username, password FROM auth ORDER BY username ASC", [], (err, rows) => {
-    res.setHeader("Content-Type", "text/csv; charset=utf-8");
-    res.setHeader("Content-Disposition", "attachment; filename=utilisateurs.csv");
-
-    let csv = "username;password\n";
-    rows.forEach((u) => {
-      csv += `${u.username};${u.password}\n`;
-    });
-
-    res.send(csv);
-  });
 });
 
 // ------------------------------------------------------------
@@ -287,6 +270,23 @@ app.post("/api/admin/updatePassword", (req, res) => {
   db.run("UPDATE auth SET password = ? WHERE id = ?", [password, id], (err) => {
     if (err) return res.json({ success: false });
     res.json({ success: true });
+  });
+});
+
+// ------------------------------------------------------------
+// EXPORT IDENTIFIANTS CSV
+// ------------------------------------------------------------
+app.get("/api/admin/exportUsers", (req, res) => {
+  db.all("SELECT username, password FROM auth ORDER BY username ASC", [], (err, rows) => {
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", "attachment; filename=utilisateurs.csv");
+
+    let csv = "username;password\n";
+    rows.forEach((u) => {
+      csv += `${u.username};${u.password}\n`;
+    });
+
+    res.send(csv);
   });
 });
 
