@@ -18,8 +18,7 @@ function logout() {
   userId = null;
   isAdmin = false;
 
-  // Cacher le bouton admin
-  btnAdmin.style.display = "none";
+  btnAdmin.style.display = "none"; // IMPORTANT
 
   appDiv.style.display = "none";
   loginDiv.style.display = "block";
@@ -29,7 +28,6 @@ function logout() {
 
   clearTimeout(inactivityTimer);
 }
-
 
 document.getElementById("btnLogout").addEventListener("click", logout);
 
@@ -524,3 +522,51 @@ async function enregistrerEmplacement() {
   }
 }
 
+// ---------------------------
+// SCANNER CODE-BARRES / QR
+// ---------------------------
+async function lancerScanner(targetInputId) {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }
+    });
+
+    const video = document.createElement("video");
+    video.srcObject = stream;
+    video.setAttribute("playsinline", true);
+    await video.play();
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const scanLoop = setInterval(() => {
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+        if (code) {
+          clearInterval(scanLoop);
+          stream.getTracks().forEach(t => t.stop());
+
+          document.getElementById(targetInputId).value = code.data;
+        }
+      }
+    }, 200);
+
+  } catch (err) {
+    alert("Impossible d'accéder à la caméra.");
+  }
+}
+
+document.getElementById("btnScanCamera").addEventListener("click", () => {
+  lancerScanner("scan");
+});
+
+document.getElementById("btnScanRoll").addEventListener("click", () => {
+  lancerScanner("panelRoll");
+});
