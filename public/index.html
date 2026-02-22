@@ -84,59 +84,65 @@
     <div id="pageEmplacements" class="bloc" style="display:none;">
       <h2>Emplacements</h2>
 
-      <button id="btnOpenPanel" class="btnAdd">Ajouter / Modifier un emplacement</button>
+      <div id="emplacementsContainer">
 
-      <p>Dernier roll scanné : <b id="lastRoll"></b></p>
+        <!-- COLONNE GAUCHE -->
+        <div id="emplacementsLeft">
 
-      <div class="searchBox">
-        <input type="text" id="searchEmplacements" placeholder="Rechercher un roll...">
-        <select id="filterStatutEmpl">
-          <option value="">Tous statuts</option>
-          <option>Arrivé</option>
-          <option>En tri</option>
-          <option>En préparation</option>
-          <option>En attente</option>
-          <option>Expédié</option>
-        </select>
-        <input type="text" id="filterEmplacementEmpl" placeholder="Filtrer par emplacement">
-        <button id="clearSearchEmpl">Effacer</button>
+          <p>Dernier roll scanné : <b id="lastRoll"></b></p>
+
+          <div class="searchBox">
+            <input type="text" id="searchEmplacements" placeholder="Rechercher un roll...">
+            <select id="filterStatutEmpl">
+              <option value="">Tous statuts</option>
+              <option>Arrivé</option>
+              <option>En tri</option>
+              <option>En préparation</option>
+              <option>En attente</option>
+              <option>Expédié</option>
+            </select>
+            <input type="text" id="filterEmplacementEmpl" placeholder="Filtrer par emplacement">
+            <button id="clearSearchEmpl">Effacer</button>
+          </div>
+
+          <table id="tableEmplacements" class="table">
+            <thead>
+              <tr>
+                <th>Roll</th>
+                <th>Emplacement</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+
+        </div>
+
+        <!-- COLONNE DROITE : FORMULAIRE -->
+        <div id="emplacementsRight" class="bloc">
+
+          <h3>Ajouter / Modifier un emplacement</h3>
+
+          <label>Roll :</label>
+          <input type="text" id="panelRoll">
+
+          <label>Emplacement :</label>
+          <input type="text" id="panelEmplacement">
+
+          <label>Statut :</label>
+          <select id="panelStatut">
+            <option>Arrivé</option>
+            <option>En tri</option>
+            <option>En préparation</option>
+            <option>En attente</option>
+            <option>Expédié</option>
+          </select>
+
+          <button id="btnSavePanel">Enregistrer</button>
+
+        </div>
+
       </div>
-
-      <table id="tableEmplacements" class="table">
-        <thead>
-          <tr>
-            <th>Roll</th>
-            <th>Emplacement</th>
-            <th>Statut</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <!-- PANNEAU COULISSANT -->
-    <div id="overlay"></div>
-
-    <div id="sidePanel">
-      <h2>Ajouter / Modifier un emplacement</h2>
-
-      <label>Roll :</label>
-      <input type="text" id="panelRoll">
-
-      <label>Emplacement :</label>
-      <input type="text" id="panelEmplacement">
-
-      <label>Statut :</label>
-      <select id="panelStatut">
-        <option>Arrivé</option>
-        <option>En tri</option>
-        <option>En préparation</option>
-        <option>En attente</option>
-        <option>Expédié</option>
-      </select>
-
-      <button id="btnSavePanel">Enregistrer</button>
-      <button id="btnClosePanel" class="btnCancel">Annuler</button>
     </div>
 
     <!-- PAGE HISTORIQUE COMPLET -->
