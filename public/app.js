@@ -6,6 +6,7 @@ let isAdmin = false;
 let scans = [];
 let usersCache = {}; 
 let inactivityTimer = null;
+let scannerStream = null;
 
 // RÉFÉRENCES DOM
 const loginDiv = document.getElementById("login");
@@ -18,7 +19,7 @@ function logout() {
   userId = null;
   isAdmin = false;
 
-  btnAdmin.style.display = "none"; // IMPORTANT
+  btnAdmin.style.display = "none";
 
   appDiv.style.display = "none";
   loginDiv.style.display = "block";
@@ -527,13 +528,15 @@ async function enregistrerEmplacement() {
 // ---------------------------
 async function lancerScanner(targetInputId) {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({
+    document.getElementById("scannerModal").style.display = "flex";
+
+    const video = document.getElementById("scannerVideo");
+
+    scannerStream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: "environment" }
     });
 
-    const video = document.createElement("video");
-    video.srcObject = stream;
-    video.setAttribute("playsinline", true);
+    video.srcObject = scannerStream;
     await video.play();
 
     const canvas = document.createElement("canvas");
@@ -546,12 +549,11 @@ async function lancerScanner(targetInputId) {
         ctx.drawImage(video, 0, 0);
 
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
         const code = jsQR(imageData.data, canvas.width, canvas.height);
 
         if (code) {
           clearInterval(scanLoop);
-          stream.getTracks().forEach(t => t.stop());
+          fermerScanner();
 
           document.getElementById(targetInputId).value = code.data;
         }
@@ -562,6 +564,17 @@ async function lancerScanner(targetInputId) {
     alert("Impossible d'accéder à la caméra.");
   }
 }
+
+function fermerScanner() {
+  document.getElementById("scannerModal").style.display = "none";
+
+  if (scannerStream) {
+    scannerStream.getTracks().forEach(t => t.stop());
+    scannerStream = null;
+  }
+}
+
+document.getElementById("closeScanner").addEventListener("click", fermerScanner);
 
 document.getElementById("btnScanCamera").addEventListener("click", () => {
   lancerScanner("scan");
