@@ -212,7 +212,8 @@ scanInput.addEventListener("keydown", async (e) => {
 
     pendingRollId = data.roll_id;
     infoPre.textContent = `Nouveau roll : ${data.roll_id}\nScanner l'emplacement...`;
-  } else if (data.type === "existing_roll") {
+  } 
+  else if (data.type === "existing_roll") {
     const r = data.roll;
 
     infoPre.textContent =
