@@ -1,99 +1,115 @@
-/* Style général */
+/* ------------------------------
+   STYLE GLOBAL
+------------------------------ */
 body {
-  font-family: Arial, sans-serif;
-  margin: 10px;
+  margin: 0;
   padding: 0;
-  background: #f7f7f7;
+  font-family: Arial, sans-serif;
+  background: #f2f4f7;
+  color: #333;
 }
 
-/* Logos */
-#header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+h1 {
+  text-align: center;
+  padding: 20px 0;
+  background: #1e88e5;
+  color: white;
+  margin: 0;
+  font-size: 28px;
 }
 
-.logo {
-  height: 60px;
-  max-width: 40%;
+/* ------------------------------
+   CONTAINER PRINCIPAL
+------------------------------ */
+#app, #login {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
 }
 
-/* Menu */
+/* ------------------------------
+   BOUTONS
+------------------------------ */
+button {
+  background: #1e88e5;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #1565c0;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* ------------------------------
+   INPUTS
+------------------------------ */
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+/* ------------------------------
+   NAVIGATION
+------------------------------ */
 .menu {
   display: flex;
-  flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .menu button {
   flex: 1;
-  min-width: 120px;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 6px;
-  border: none;
-  background: #0078d4;
-  color: white;
 }
 
-/* Champs de saisie */
-input[type="text"],
-input[type="password"],
-select {
-  width: 100%;
-  padding: 12px;
-  font-size: 18px;
-  margin: 8px 0;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-/* Boutons */
-button {
-  padding: 12px;
-  font-size: 18px;
-  border-radius: 6px;
-  border: none;
-  background: #0078d4;
-  color: white;
-  margin-top: 10px;
-  width: 100%;
-}
-
-/* Zones d'affichage */
-pre {
+/* ------------------------------
+   CARTES / BLOCS
+------------------------------ */
+.bloc, #pageAdmin, #pageScan, #pageEmplacements, #pageHistorique {
   background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* ------------------------------
+   LISTE UTILISATEURS
+------------------------------ */
+.userLine {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f7f9fc;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.userLine input {
+  width: 150px;
+}
+
+/* ------------------------------
+   PRE (AFFICHAGE TEXTE)
+------------------------------ */
+pre {
+  background: #f7f9fc;
   padding: 12px;
   border-radius: 6px;
-  white-space: pre-wrap;
-  max-height: 300px;
-  overflow-y: auto;
+  overflow-x: auto;
   border: 1px solid #ddd;
-}
-
-/* Titres */
-h2, h3 {
-  margin-top: 20px;
-}
-
-/* Responsive mobile */
-@media (max-width: 600px) {
-  body {
-    margin: 5px;
-  }
-
-  .menu button {
-    font-size: 14px;
-    padding: 10px;
-  }
-
-  input, select, button {
-    font-size: 16px;
-  }
-
-  .logo {
-    height: 45px;
-  }
 }
