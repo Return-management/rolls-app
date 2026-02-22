@@ -17,35 +17,79 @@
   <div id="app" style="display:none;">
     <p>Connecté en tant que <span id="currentUser"></span></p>
 
-    <div class="bloc">
-      <label>Statut du roll :</label>
-      <select id="statut">
-        <option>Arrivé</option>
-        <option>En tri</option>
-        <option>En préparation</option>
-        <option>En attente</option>
-        <option>Expédié</option>
-      </select>
+    <div class="menu">
+      <button id="btnPageScan">Scan</button>
+      <button id="btnEmplacements">Emplacements</button>
+      <button id="btnHistorique">Historique complet</button>
+      <button id="btnAdmin">Administration</button>
     </div>
 
-    <div class="bloc">
-      <label>Scan code-barres :</label>
-      <input type="text" id="scan" autofocus />
+    <!-- PAGE SCAN -->
+    <div id="pageScan">
+      <div class="bloc">
+        <label>Statut du roll :</label>
+        <select id="statut">
+          <option>Arrivé</option>
+          <option>En tri</option>
+          <option>En préparation</option>
+          <option>En attente</option>
+          <option>Expédié</option>
+        </select>
+      </div>
+
+      <div class="bloc">
+        <label>Scan code-barres :</label>
+        <input type="text" id="scan" autofocus />
+      </div>
+
+      <div class="bloc">
+        <button id="btnAlertes">Voir les alertes</button>
+        <button id="btnExport">Exporter CSV</button>
+      </div>
+
+      <div class="bloc">
+        <h2>Infos</h2>
+        <pre id="info"></pre>
+      </div>
+
+      <div class="bloc">
+        <h2>Historique du roll scanné</h2>
+        <pre id="historique"></pre>
+      </div>
     </div>
 
-    <div class="bloc">
-      <button id="btnAlertes">Voir les alertes</button>
-      <button id="btnExport">Exporter CSV</button>
+    <!-- PAGE EMPLACEMENTS -->
+    <div id="pageEmplacements" style="display:none;">
+      <h2>Emplacements</h2>
+      <input type="text" id="scanRecherche" placeholder="Scanner un roll pour savoir où il est" />
+      <h3>Liste des emplacements</h3>
+      <pre id="listeEmplacements"></pre>
     </div>
 
-    <div class="bloc">
-      <h2>Infos</h2>
-      <pre id="info"></pre>
+    <!-- PAGE HISTORIQUE COMPLET -->
+    <div id="pageHistorique" style="display:none;">
+      <h2>Historique complet</h2>
+      <input type="text" id="filtreHistorique" placeholder="Rechercher..." />
+      <pre id="listeHistorique"></pre>
     </div>
 
-    <div class="bloc">
-      <h2>Historique du roll</h2>
-      <pre id="historique"></pre>
+    <!-- PAGE ADMIN -->
+    <div id="pageAdmin" style="display:none;">
+      <h2>Administration</h2>
+
+      <div id="adminLogin">
+        <input type="text" id="adminUser" placeholder="Admin" />
+        <input type="password" id="adminPass" placeholder="Mot de passe" />
+        <button id="btnAdminLogin">Connexion</button>
+      </div>
+
+      <div id="adminPanel" style="display:none;">
+        <h3>Ajouter un utilisateur</h3>
+        <input type="text" id="newUser" placeholder="Nom utilisateur" />
+        <input type="password" id="newPass" placeholder="Mot de passe" />
+        <button id="btnAddUser">Ajouter</button>
+        <pre id="adminInfo"></pre>
+      </div>
     </div>
   </div>
 
