@@ -4,6 +4,7 @@
 let userId = null;
 let isAdmin = false;
 let scans = [];
+let usersCache = {}; // Pour afficher le nom du user dans Emplacements
 
 // RÉFÉRENCES DOM
 const loginDiv = document.getElementById("login");
@@ -41,7 +42,21 @@ async function login() {
 
   if (isAdmin) btnAdmin.style.display = "inline-block";
 
+  await chargerUsersCache(); // Pour afficher les noms dans Emplacements
   showScan();
+}
+
+// ---------------------------
+// CHARGER LES UTILISATEURS POUR AFFICHAGE
+// ---------------------------
+async function chargerUsersCache() {
+  const res = await fetch("/api/admin/listUsers");
+  const data = await res.json();
+
+  usersCache = {};
+  data.users.forEach(u => {
+    usersCache[u.id] = u.username;
+  });
 }
 
 // ---------------------------
@@ -209,7 +224,7 @@ function remplirTableauHistoriqueScan(historique) {
 }
 
 // ---------------------------
-// EMPLACEMENTS
+// EMPLACEMENTS (MODIFIÉ)
 // ---------------------------
 async function chargerEmplacements() {
   const res = await fetch("/api/emplacements");
@@ -219,11 +234,14 @@ async function chargerEmplacements() {
   tbody.innerHTML = "";
 
   data.emplacements.forEach(e => {
+    const username = usersCache[e.user_id] || "(inconnu)";
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${e.roll_id}</td>
       <td>${e.emplacement}</td>
+      <td>${e.roll_id}</td>
       <td>${e.statut}</td>
+      <td>${username}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -358,9 +376,9 @@ function filtrerTableauAvance(options) {
 function activerFiltresEmplacements() {
   const options = {
     tableId: "tableEmplacements",
-    rollIndex: 0,
+    rollIndex: 1,
     statutIndex: 2,
-    emplacementIndex: 1,
+    emplacementIndex: 0,
     searchId: "searchEmplacements",
     statutId: "filterStatutEmpl",
     emplacementId: "filterEmplacementEmpl"
@@ -414,21 +432,16 @@ async function enregistrerEmplacement() {
   const emplacement = document.getElementById("panelEmplacement").value.trim();
   let statut = document.getElementById("panelStatut").value;
 
-  // 👉 Si le roll est vide → demander confirmation
+  // 👉 Si roll vide → demander confirmation
   if (!roll) {
     const confirmEmpty = confirm(
       "⚠ Aucun roll n'a été renseigné.\nVoulez-vous enregistrer l'emplacement sans roll ?"
     );
 
-    if (!confirmEmpty) {
-      return; // ❌ Annulé par l'utilisateur
-    }
+    if (!confirmEmpty) return;
 
-    // 👉 Générer un roll automatique
-    roll = "Vide";
-
-    // 👉 Pas de statut si roll vide
-    statut = "";
+    roll = "EMPTY-" + Date.now();
+    statut = ""; // Pas de statut si roll vide
   }
 
   let res = await fetch("/api/assign", {
@@ -469,13 +482,8 @@ async function enregistrerEmplacement() {
 
   if (data.success) {
     chargerEmplacements();
-
-    // Réinitialisation du formulaire
     document.getElementById("panelRoll").value = "";
     document.getElementById("panelEmplacement").value = "";
     document.getElementById("panelStatut").value = "Arrivé";
   }
 }
-
-
-
