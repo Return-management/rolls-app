@@ -54,7 +54,7 @@
       <input type="text" id="scan" autofocus />
 
       <h3>Tableau des scans</h3>
-      <table id="tableScans" border="1" style="width:100%;border-collapse:collapse;">
+      <table id="tableScans" class="table">
         <thead>
           <tr>
             <th>Roll</th>
@@ -67,7 +67,17 @@
       </table>
 
       <h3>Historique du roll scanné</h3>
-      <pre id="historique"></pre>
+      <table id="tableHistoriqueScan" class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Emplacement</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
 
     <!-- PAGE EMPLACEMENTS -->
@@ -76,14 +86,34 @@
 
       <p>Dernier roll scanné : <b id="lastRoll"></b></p>
 
-      <h3>Liste des emplacements</h3>
-      <pre id="listeEmplacements"></pre>
+      <table id="tableEmplacements" class="table">
+        <thead>
+          <tr>
+            <th>Roll</th>
+            <th>Emplacement</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
 
     <!-- PAGE HISTORIQUE COMPLET -->
     <div id="pageHistorique" class="bloc" style="display:none;">
       <h2>Historique complet</h2>
-      <pre id="listeHistorique"></pre>
+
+      <table id="tableHistorique" class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Roll</th>
+            <th>Emplacement</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
 
     <!-- PAGE ADMIN -->
