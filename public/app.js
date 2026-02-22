@@ -198,7 +198,7 @@ function remplirTableauHistoriqueScan(historique) {
 
   historique.forEach(h => {
     const tr = document.createElement("tr");
-    tr.innerinnerHTML = `
+    tr.innerHTML = `
       <td>${h.date}</td>
       <td>${h.emplacement}</td>
       <td>${h.statut}</td>
@@ -405,18 +405,18 @@ function activerFiltresHistorique() {
 }
 
 // ---------------------------
-// FORMULAIRE MANUEL (AJOUTÉ)
+// FORMULAIRE MANUEL (MODIFIÉ)
 // ---------------------------
 document.getElementById("btnSavePanel").addEventListener("click", enregistrerEmplacement);
 
 async function enregistrerEmplacement() {
-  const roll = document.getElementById("panelRoll").value.trim();
+  let roll = document.getElementById("panelRoll").value.trim();
   const emplacement = document.getElementById("panelEmplacement").value.trim();
   const statut = document.getElementById("panelStatut").value;
 
+  // 👉 Autoriser un emplacement sans roll
   if (!roll) {
-    alert("Le roll est obligatoire.");
-    return;
+    roll = "EMPTY-" + Date.now();
   }
 
   let res = await fetch("/api/assign", {
