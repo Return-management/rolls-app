@@ -159,16 +159,24 @@ async function traiterScan() {
 
   document.getElementById("lastRoll").textContent = code;
 
-  if (data.type === "new_roll") {
-    const emplacement = prompt("Nouveau roll détecté. Entrez l’emplacement (laisser vide possible) :");
-    if (emplacement !== null) await assignerRoll(code, emplacement);
-  }
+  if (data.type === "new_roll" || data.type === "existing_roll") {
 
-  if (data.type === "existing_roll") {
-    remplirTableauHistoriqueScan(data.historique);
+    if (data.type === "existing_roll") {
+      remplirTableauHistoriqueScan(data.historique);
+    }
 
-    const emplacement = prompt("Modifier l’emplacement du roll (laisser vide possible) ?");
-    if (emplacement !== null) await assignerRoll(code, emplacement);
+    const modal = document.getElementById("modalEmplacement");
+    const inputEmpl = document.getElementById("modalEmplInput");
+    const btnValider = document.getElementById("modalEmplValider");
+
+    modal.style.display = "flex";
+    inputEmpl.value = "";
+
+    btnValider.onclick = async () => {
+      const emplacement = inputEmpl.value.trim();
+      modal.style.display = "none";
+      await assignerRoll(code, emplacement);
+    };
   }
 
   scan.value = "";
