@@ -139,3 +139,22 @@ app.get("/api/export", (req, res) => {
 app.listen(PORT, () => {
   console.log("Serveur démarré sur le port " + PORT);
 });
+app.get("/api/emplacements", (req, res) => {
+  db.all("SELECT DISTINCT emplacement FROM rolls ORDER BY emplacement ASC", [], (err, rows) => {
+    res.json({ emplacements: rows });
+  });
+});
+app.get("/api/recherche/:roll_id", (req, res) => {
+  const roll_id = req.params.roll_id;
+
+  db.get("SELECT * FROM rolls WHERE roll_id = ?", [roll_id], (err, row) => {
+    if (!row) return res.json({ exists: false });
+
+    res.json({
+      exists: true,
+      emplacement: row.emplacement,
+      statut: row.statut
+    });
+  });
+});
+
