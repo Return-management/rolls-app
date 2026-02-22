@@ -14,6 +14,14 @@ const db = new sqlite3.Database("rolls.db");
 
 db.serialize(() => {
   db.run(`
+    CREATE TABLE IF NOT EXISTS auth (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT UNIQUE,
+      password TEXT
+    )
+  `);
+
+  db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       nom TEXT UNIQUE
@@ -40,31 +48,13 @@ db.serialize(() => {
     )
   `);
 
-  db.run(`
-    CREATE TABLE IF NOT EXISTS auth (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE,
-      password TEXT
-    )
-  `);
-
-  // Admin par défaut (à changer ensuite dans la page admin)
   db.run(
     "INSERT OR IGNORE INTO auth(username, password) VALUES (?, ?)",
     ["admin", "admin"]
   );
 });
 
-function getOrCreateUser(nom, cb) {
-  db.get("SELECT id FROM users WHERE nom = ?", [nom], (err, row) => {
-    if (row) return cb(null, row.id);
-    db.run("INSERT INTO users(nom) VALUES (?)", [nom], function () {
-      cb(null, this.lastID);
-    });
-  });
-}
-
-// Login utilisateur (par nom et mot de passe)
+// LOGIN sécurisé
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
 
@@ -72,35 +62,23 @@ app.post("/api/login", (req, res) => {
     "SELECT id FROM auth WHERE username = ? AND password = ?",
     [username, password],
     (err, row) => {
-      if (err) return res.json({ success: false, error: "Erreur serveur" });
+      if (err) return res.json({ success: false });
       if (!row) return res.json({ success: false });
-
       res.json({ success: true, userId: row.id });
     }
   );
 });
 
-
-  getOrCreateUser(nom, (err, id) => {
-    if (err) return res.status(500).json({ error: "Erreur serveur" });
-    res.json({ userId: id });
-  });
-});
-
-// Scan d'un roll
+// SCAN
 app.post("/api/scan", (req, res) => {
   const { code } = req.body;
-  if (!code) return res.status(400).json({ error: "Code requis" });
 
   db.get("SELECT * FROM rolls WHERE roll_id = ?", [code], (err, roll) => {
-    if (err) return res.status(500).json({ error: "Erreur DB" });
-
     if (roll) {
       db.all(
         "SELECT date, emplacement, statut, action FROM historique WHERE roll_id = ? ORDER BY date ASC",
         [code],
         (err2, hist) => {
-          if (err2) return res.status(500).json({ error: "Erreur DB" });
           res.json({
             type: "existing_roll",
             roll,
@@ -112,69 +90,51 @@ app.post("/api/scan", (req, res) => {
       res.json({
         type: "new_roll",
         roll_id: code,
-        message: "Nouveau roll, scanner l'emplacement"
+        message: "Nouveau roll"
       });
     }
   });
 });
 
-// Affectation / déplacement d'un roll
+// ASSIGNATION / DÉPLACEMENT
 app.post("/api/assign", (req, res) => {
   const { roll_id, emplacement, statut, userId } = req.body;
-  if (!roll_id || !emplacement || !userId) {
-    return res.status(400).json({ error: "Données manquantes" });
-  }
 
-  const finalStatut = statut || "Arrivé";
   const now = new Date().toISOString().replace("T", " ").substring(0, 19);
 
   db.run(
     "INSERT OR REPLACE INTO rolls(roll_id, emplacement, statut) VALUES (?,?,?)",
-    [roll_id, emplacement, finalStatut],
-    (err) => {
-      if (err) return res.status(500).json({ error: "Erreur DB" });
-
+    [roll_id, emplacement, statut],
+    () => {
       db.run(
         "INSERT INTO historique(date, roll_id, emplacement, statut, user_id, action) VALUES (?,?,?,?,?,?)",
-        [now, roll_id, emplacement, finalStatut, userId, "Déplacement"],
-        (err2) => {
-          if (err2) return res.status(500).json({ error: "Erreur DB" });
-          res.json({ success: true });
-        }
+        [now, roll_id, emplacement, statut, userId, "Déplacement"],
+        () => res.json({ success: true })
       );
     }
   );
 });
 
-// Emplacements distincts
+// EMPLACEMENTS
 app.get("/api/emplacements", (req, res) => {
   db.all(
-    "SELECT DISTINCT emplacement FROM rolls WHERE emplacement IS NOT NULL AND emplacement <> '' ORDER BY emplacement ASC",
+    "SELECT DISTINCT emplacement FROM rolls WHERE emplacement IS NOT NULL ORDER BY emplacement ASC",
     [],
-    (err, rows) => {
-      if (err) return res.status(500).json({ error: "Erreur DB" });
-      res.json({ emplacements: rows });
-    }
+    (err, rows) => res.json({ emplacements: rows })
   );
 });
 
-// Recherche d'un roll (position actuelle)
+// RECHERCHE ROLL
 app.get("/api/recherche/:roll_id", (req, res) => {
   const roll_id = req.params.roll_id;
 
   db.get("SELECT * FROM rolls WHERE roll_id = ?", [roll_id], (err, row) => {
-    if (err) return res.status(500).json({ error: "Erreur DB" });
     if (!row) return res.json({ exists: false });
-
-    res.json({
-      exists: true,
-      emplacement: row.emplacement,
-      statut: row.statut
-    });
+    res.json({ exists: true, emplacement: row.emplacement, statut: row.statut });
   });
 });
 
-// Historique complet
+// HISTORIQUE COMPLET
 app.get("/api/historique", (req, res) => {
   const sql = `
     SELECT h.date, h.roll_id, h.emplacement, h.statut, u.nom AS utilisateur, h.action
@@ -182,13 +142,10 @@ app.get("/api/historique", (req, res) => {
     LEFT JOIN users u ON u.id = h.user_id
     ORDER BY h.date DESC
   `;
-  db.all(sql, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Erreur DB" });
-    res.json({ historique: rows });
-  });
+  db.all(sql, [], (err, rows) => res.json({ historique: rows }));
 });
 
-// Alertes (rolls immobiles depuis 4h)
+// ALERTES
 app.get("/api/alertes", (req, res) => {
   const limite = new Date(Date.now() - 4 * 3600 * 1000)
     .toISOString()
@@ -203,13 +160,10 @@ app.get("/api/alertes", (req, res) => {
     HAVING last_date < ?
   `;
 
-  db.all(sql, [limite], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Erreur DB" });
-    res.json({ alertes: rows });
-  });
+  db.all(sql, [limite], (err, rows) => res.json({ alertes: rows }));
 });
 
-// Export CSV
+// EXPORT CSV
 app.get("/api/export", (req, res) => {
   const sql = `
     SELECT h.date, h.roll_id, h.emplacement, h.statut, u.nom AS utilisateur, h.action
@@ -217,11 +171,10 @@ app.get("/api/export", (req, res) => {
     LEFT JOIN users u ON u.id = h.user_id
     ORDER BY h.date ASC
   `;
-  db.all(sql, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Erreur DB" });
 
+  db.all(sql, [], (err, rows) => {
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
-    res.setHeader("Content-Disposition", "attachment; filename=historique_rolls.csv");
+    res.setHeader("Content-Disposition", "attachment; filename=historique.csv");
 
     let csv = "date;roll_id;emplacement;statut;utilisateur;action\n";
     rows.forEach((r) => {
@@ -232,32 +185,29 @@ app.get("/api/export", (req, res) => {
   });
 });
 
-// Login admin
+// ADMIN LOGIN
 app.post("/api/admin/login", (req, res) => {
   const { username, password } = req.body;
-  if (!username || !password) return res.json({ success: false });
 
   db.get(
     "SELECT * FROM auth WHERE username = ? AND password = ?",
     [username, password],
     (err, row) => {
-      if (err) return res.json({ success: false });
       if (!row) return res.json({ success: false });
       res.json({ success: true });
     }
   );
 });
 
-// Ajout utilisateur (auth)
+// AJOUT UTILISATEUR
 app.post("/api/admin/addUser", (req, res) => {
   const { username, password } = req.body;
-  if (!username || !password) return res.json({ success: false, error: "Données manquantes" });
 
   db.run(
     "INSERT INTO auth(username, password) VALUES (?,?)",
     [username, password],
     (err) => {
-      if (err) return res.json({ success: false, error: "Utilisateur déjà existant" });
+      if (err) return res.json({ success: false, error: "Utilisateur existant" });
       res.json({ success: true });
     }
   );
@@ -266,4 +216,3 @@ app.post("/api/admin/addUser", (req, res) => {
 app.listen(PORT, () => {
   console.log("Serveur démarré sur le port " + PORT);
 });
-
