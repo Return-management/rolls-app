@@ -13,11 +13,14 @@
 
   <h1>Suivi des rolls</h1>
 
-  <div id="login">
-    <label>Utilisateur :</label>
-    <input type="text" id="userName" />
-    <button id="btnLogin">Se connecter</button>
-  </div>
+<div id="login">
+  <h2>Connexion</h2>
+  <input type="text" id="loginUser" placeholder="Identifiant" />
+  <input type="password" id="loginPass" placeholder="Mot de passe" />
+  <button id="btnLogin">Se connecter</button>
+  <p id="loginError" style="color:red;"></p>
+</div>
+
 
   <div id="app" style="display:none;">
     <p>Connecté en tant que <span id="currentUser"></span></p>
@@ -102,5 +105,6 @@
   <script src="app.js"></script>
 </body>
 </html>
+
 
 
