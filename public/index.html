@@ -154,7 +154,7 @@
           <label>Roll :</label>
           <div class="scanBox">
             <input type="text" id="panelRoll">
-            <button class="scanBtn" onclick="lancerScanner('panelRoll')">📷</button>
+            <button id="btnScanRoll" class="scanBtn" onclick="lancerScanner('panelRoll')">📷</button>
           </div>
 
           <label>Emplacement :</label>
@@ -256,6 +256,18 @@
           <video id="scannerVideo" autoplay playsinline></video>
           <button id="closeScanner">Fermer</button>
       </div>
+  </div>
+
+  <!-- Fenêtre pour saisir/scanner l’emplacement après scan roll -->
+  <div id="modalEmplacement">
+    <div id="modalBox">
+      <h3>Choisir l’emplacement</h3>
+      <div class="scanBox">
+        <input type="text" id="modalEmplInput" placeholder="Emplacement">
+        <button class="scanBtn" onclick="lancerScanner('modalEmplInput')">📷</button>
+      </div>
+      <button id="modalEmplValider">Valider</button>
+    </div>
   </div>
 
   <!-- Librairie ZXing -->
