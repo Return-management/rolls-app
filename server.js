@@ -53,7 +53,7 @@ db.serialize(() => {
 });
 
 // ------------------------------------------------------------
-// LOGIN UNIQUE
+// LOGIN
 // ------------------------------------------------------------
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
@@ -141,45 +141,40 @@ app.post("/api/scan", (req, res) => {
 });
 
 // ------------------------------------------------------------
-// ASSIGNATION
+// ASSIGNATION AVEC GESTION DES CONFLITS
 // ------------------------------------------------------------
 app.post("/api/assign", (req, res) => {
-  const { roll_id, emplacement, statut, userId } = req.body;
+  const { roll_id, emplacement, statut, userId, force } = req.body;
 
   const now = new Date().toISOString().replace("T", " ").substring(0, 19);
 
-  db.run(
-    "INSERT OR REPLACE INTO rolls(roll_id, emplacement, statut) VALUES (?,?,?)",
-    [roll_id, emplacement, statut],
-    () => {
-      db.run(
-        "INSERT INTO historique(date, roll_id, emplacement, statut, user_id, action) VALUES (?,?,?,?,?,?)",
-        [now, roll_id, emplacement, statut, userId, "Déplacement"],
-        () => res.json({ success: true })
-      );
+  // Vérifier si l’emplacement est déjà occupé
+  db.get("SELECT roll_id FROM rolls WHERE emplacement = ?", [emplacement], (err, row) => {
+    if (row && row.roll_id !== roll_id && !force) {
+      return res.json({
+        success: false,
+        conflict: true,
+        existingRoll: row.roll_id
+      });
     }
-  );
+
+    // Écrasement autorisé ou emplacement libre
+    db.run(
+      "INSERT OR REPLACE INTO rolls(roll_id, emplacement, statut) VALUES (?,?,?)",
+      [roll_id, emplacement, statut],
+      () => {
+        db.run(
+          "INSERT INTO historique(date, roll_id, emplacement, statut, user_id, action) VALUES (?,?,?,?,?,?)",
+          [now, roll_id, emplacement, statut, userId, "Déplacement"],
+          () => res.json({ success: true })
+        );
+      }
+    );
+  });
 });
 
 // ------------------------------------------------------------
 // EMPLACEMENTS
 // ------------------------------------------------------------
 app.get("/api/emplacements", (req, res) => {
-  db.all("SELECT roll_id, emplacement, statut FROM rolls ORDER BY emplacement ASC", [], (err, rows) => {
-    res.json({ emplacements: rows });
-  });
-});
-
-// ------------------------------------------------------------
-// HISTORIQUE COMPLET
-// ------------------------------------------------------------
-app.get("/api/historique", (req, res) => {
-  db.all(
-    "SELECT date, roll_id, emplacement, statut, action FROM historique ORDER BY date DESC",
-    [],
-    (err, rows) => res.json({ historique: rows })
-  );
-});
-
-// ------------------------------------------------------------
-app.listen(PORT, () => console.log("Serveur démarré sur le port " + PORT));
+  db.all("SELECT roll_id, emplacement, statut FROM rolls ORDER BY emplacement ASC", [], (err,
