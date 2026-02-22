@@ -18,6 +18,9 @@ function logout() {
   userId = null;
   isAdmin = false;
 
+  // Cacher le bouton admin
+  btnAdmin.style.display = "none";
+
   appDiv.style.display = "none";
   loginDiv.style.display = "block";
 
@@ -26,6 +29,7 @@ function logout() {
 
   clearTimeout(inactivityTimer);
 }
+
 
 document.getElementById("btnLogout").addEventListener("click", logout);
 
@@ -519,3 +523,4 @@ async function enregistrerEmplacement() {
     document.getElementById("panelStatut").value = "Arrivé";
   }
 }
+
