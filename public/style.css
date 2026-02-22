@@ -180,6 +180,10 @@ pre {
   border-radius: 6px;
   font-size: 18px;
 }
+
+/* ------------------------------
+   MODAL SCANNER
+------------------------------ */
 #scannerModal {
   position: fixed;
   top: 0;
@@ -210,4 +214,3 @@ pre {
   margin-top: 10px;
   background: #e53935;
 }
-
