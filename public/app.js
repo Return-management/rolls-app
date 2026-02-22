@@ -51,7 +51,8 @@ const newUser = document.getElementById("newUser");
 const newPass = document.getElementById("newPass");
 const btnAddUser = document.getElementById("btnAddUser");
 const adminInfo = document.getElementById("adminInfo");
-
+const listeUsers = document.getElementById("listeUsers");
+const btnExportUsers = document.getElementById("btnExportUsers");
 
 // ------------------------------------------------------------
 // UTILITAIRE : empêcher l’accès sans login
@@ -166,7 +167,6 @@ scanInput.addEventListener("keydown", async (e) => {
   scanInput.value = "";
   if (!code) return;
 
-  // Si on attend un emplacement
   if (pendingRollId) {
     const emplacement = code;
     const statut = statutSelect.value;
@@ -195,7 +195,6 @@ scanInput.addEventListener("keydown", async (e) => {
     return;
   }
 
-  // Scan normal
   const res = await fetch("/api/scan", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -213,9 +212,7 @@ scanInput.addEventListener("keydown", async (e) => {
 
     pendingRollId = data.roll_id;
     infoPre.textContent = `Nouveau roll : ${data.roll_id}\nScanner l'emplacement...`;
-  }
-
-  else if (data.type === "existing_roll") {
+  } else if (data.type === "existing_roll") {
     const r = data.roll;
 
     infoPre.textContent =
@@ -282,7 +279,7 @@ btnAlertes.addEventListener("click", async () => {
 });
 
 // ------------------------------------------------------------
-// EXPORT CSV
+// EXPORT HISTORIQUE CSV
 // ------------------------------------------------------------
 btnExport.addEventListener("click", () => {
   window.location.href = "/api/export";
@@ -322,7 +319,7 @@ filtreHistorique.addEventListener("input", () => {
 });
 
 // ------------------------------------------------------------
-// PAGE ADMIN
+// PAGE ADMIN : LOGIN ADMIN
 // ------------------------------------------------------------
 btnAdminLogin.addEventListener("click", async () => {
   const username = adminUser.value.trim();
@@ -348,8 +345,28 @@ btnAdminLogin.addEventListener("click", async () => {
 
   adminLoginDiv.style.display = "none";
   adminPanelDiv.style.display = "block";
+  chargerUtilisateurs();
 });
 
+// ------------------------------------------------------------
+// PAGE ADMIN : CHARGER UTILISATEURS
+// ------------------------------------------------------------
+async function chargerUtilisateurs() {
+  const res = await fetch("/api/admin/listUsers");
+  const data = await res.json();
+
+  let txt = "";
+  data.users.forEach((u) => {
+    const masked = "*".repeat(u.password.length || 8);
+    txt += `ID: ${u.id} | ${u.username} | ${masked}\n`;
+  });
+
+  listeUsers.textContent = txt || "Aucun utilisateur.";
+}
+
+// ------------------------------------------------------------
+// PAGE ADMIN : AJOUT UTILISATEUR
+// ------------------------------------------------------------
 btnAddUser.addEventListener("click", async () => {
   const username = newUser.value.trim();
   const password = newPass.value.trim();
@@ -366,18 +383,19 @@ btnAddUser.addEventListener("click", async () => {
   });
 
   const data = await res.json();
-
   if (data.success) {
     adminInfo.textContent = "Utilisateur ajouté.";
     newUser.value = "";
     newPass.value = "";
+    chargerUtilisateurs();
   } else {
     adminInfo.textContent = "Erreur : " + (data.error || "inconnue");
   }
 });
-;
 
-
-
-
-
+// ------------------------------------------------------------
+// PAGE ADMIN : EXPORT USERS
+// ------------------------------------------------------------
+btnExportUsers.addEventListener("click", () => {
+  window.location.href = "/api/admin/exportUsers";
+});
