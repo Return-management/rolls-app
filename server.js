@@ -25,7 +25,6 @@ db.serialize(() => {
     )
   `);
 
-  // Création automatique de l’admin
   db.run(
     "INSERT OR IGNORE INTO auth(username, password, isAdmin) VALUES (?, ?, ?)",
     ["admin", "admin", 1]
@@ -148,7 +147,6 @@ app.post("/api/assign", (req, res) => {
 
   const now = new Date().toISOString().replace("T", " ").substring(0, 19);
 
-  // Vérifier si l’emplacement est déjà occupé
   db.get("SELECT roll_id FROM rolls WHERE emplacement = ?", [emplacement], (err, row) => {
     if (row && row.roll_id !== roll_id && !force) {
       return res.json({
@@ -158,7 +156,6 @@ app.post("/api/assign", (req, res) => {
       });
     }
 
-    // Écrasement autorisé ou emplacement libre
     db.run(
       "INSERT OR REPLACE INTO rolls(roll_id, emplacement, statut) VALUES (?,?,?)",
       [roll_id, emplacement, statut],
@@ -177,4 +174,21 @@ app.post("/api/assign", (req, res) => {
 // EMPLACEMENTS
 // ------------------------------------------------------------
 app.get("/api/emplacements", (req, res) => {
-  db.all("SELECT roll_id, emplacement, statut FROM rolls ORDER BY emplacement ASC", [], (err,
+  db.all("SELECT roll_id, emplacement, statut FROM rolls ORDER BY emplacement ASC", [], (err, rows) => {
+    res.json({ emplacements: rows });
+  });
+});
+
+// ------------------------------------------------------------
+// HISTORIQUE COMPLET
+// ------------------------------------------------------------
+app.get("/api/historique", (req, res) => {
+  db.all(
+    "SELECT date, roll_id, emplacement, statut, action FROM historique ORDER BY date DESC",
+    [],
+    (err, rows) => res.json({ historique: rows })
+  );
+});
+
+// ------------------------------------------------------------
+app.listen(PORT, () => console.log("Serveur démarré sur le port " + PORT));
