@@ -59,7 +59,10 @@
       </select>
 
       <label>Scan code-barres :</label>
-      <input type="text" id="scan" autofocus />
+      <div class="scanBox">
+        <input type="text" id="scan" placeholder="Scanner un code...">
+        <button id="btnScanCamera" class="scanBtn">📷</button>
+      </div>
 
       <h3>Tableau des scans</h3>
       <table id="tableScans" class="table">
@@ -133,7 +136,10 @@
           <h3>Ajouter / Modifier un emplacement</h3>
 
           <label>Roll :</label>
-          <input type="text" id="panelRoll">
+          <div class="scanBox">
+            <input type="text" id="panelRoll">
+            <button id="btnScanRoll" class="scanBtn">📷</button>
+          </div>
 
           <label>Emplacement :</label>
           <input type="text" id="panelEmplacement">
@@ -204,6 +210,9 @@
     </div>
 
   </div>
+
+  <!-- Librairie QR / Code-barres -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
 
   <script src="app.js"></script>
 </body>
