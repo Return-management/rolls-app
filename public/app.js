@@ -5,6 +5,10 @@ let userId = null;
 let isAdmin = false;
 let scans = [];
 
+// RÉFÉRENCES DOM MANQUANTES (ERREUR RÉSOLUE)
+const loginDiv = document.getElementById("login");
+const appDiv = document.getElementById("app");
+
 // ---------------------------
 // CONNEXION
 // ---------------------------
@@ -97,16 +101,13 @@ async function traiterScan() {
 
   const data = await res.json();
 
-  // Afficher le dernier roll scanné dans Emplacements
   document.getElementById("lastRoll").textContent = code;
 
-  // Nouveau roll
   if (data.type === "new_roll") {
     const emplacement = prompt("Nouveau roll détecté. Entrez l’emplacement :");
     if (emplacement) await assignerRoll(code, emplacement);
   }
 
-  // Roll existant
   if (data.type === "existing_roll") {
     remplirTableauHistoriqueScan(data.historique);
 
@@ -138,7 +139,7 @@ async function assignerRoll(roll_id, emplacement) {
 
   if (data.success) {
     ajouterScanTableau(roll_id, emplacement, statut);
-    chargerEmplacements(); // mise à jour auto
+    chargerEmplacements();
   }
 }
 
