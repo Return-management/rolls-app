@@ -3,8 +3,9 @@
 // ---------------------------
 let userId = null;
 let isAdmin = false;
+let scans = []; // stockage des scans
 
-// Éléments DOM
+// DOM
 const loginDiv = document.getElementById("login");
 const appDiv = document.getElementById("app");
 
@@ -20,14 +21,13 @@ const btnEmplacements = document.getElementById("btnEmplacements");
 const btnHistorique = document.getElementById("btnHistorique");
 const btnAdmin = document.getElementById("btnAdmin");
 
-// Pages
 const pageScan = document.getElementById("pageScan");
 const pageEmplacements = document.getElementById("pageEmplacements");
 const pageHistorique = document.getElementById("pageHistorique");
 const pageAdmin = document.getElementById("pageAdmin");
 
 // ---------------------------
-// CONNEXION UNIQUE
+// CONNEXION
 // ---------------------------
 btnLogin.addEventListener("click", login);
 
@@ -100,7 +100,7 @@ function showAdmin() {
 }
 
 // ---------------------------
-// SCAN (Entrée valide le scan)
+// SCAN
 // ---------------------------
 document.getElementById("scan").addEventListener("keydown", (e) => {
   if (e.key === "Enter") traiterScan();
@@ -118,34 +118,27 @@ async function traiterScan() {
 
   const data = await res.json();
 
-  document.getElementById("info").textContent = JSON.stringify(data, null, 2);
+  // afficher le roll dans la page Emplacements
+  document.getElementById("lastRoll").textContent = code;
 
-  // Nouveau roll → demander emplacement
   if (data.type === "new_roll") {
     const emplacement = prompt("Nouveau roll détecté. Entrez l’emplacement :");
-
-    if (emplacement) {
-      await assignerRoll(code, emplacement);
-    }
+    if (emplacement) await assignerRoll(code, emplacement);
   }
 
-  // Roll existant → afficher historique + possibilité de modifier emplacement
   if (data.type === "existing_roll") {
     document.getElementById("historique").textContent =
       JSON.stringify(data.historique, null, 2);
 
-    const emplacement = prompt("Modifier l’emplacement du roll ? (laisser vide pour ignorer)");
-
-    if (emplacement) {
-      await assignerRoll(code, emplacement);
-    }
+    const emplacement = prompt("Modifier l’emplacement du roll ?");
+    if (emplacement) await assignerRoll(code, emplacement);
   }
 
   document.getElementById("scan").value = "";
 }
 
 // ---------------------------
-// ASSIGNATION DU ROLL
+// ASSIGNATION
 // ---------------------------
 async function assignerRoll(roll_id, emplacement) {
   const statut = document.getElementById("statut").value;
@@ -164,10 +157,29 @@ async function assignerRoll(roll_id, emplacement) {
   const data = await res.json();
 
   if (data.success) {
-    document.getElementById("info").textContent = "Roll enregistré.";
-  } else {
-    document.getElementById("info").textContent = "Erreur lors de l’enregistrement.";
+    ajouterScanTableau(roll_id, emplacement, statut);
   }
+}
+
+// ---------------------------
+// TABLEAU DES SCANS
+// ---------------------------
+function ajouterScanTableau(roll, emplacement, statut) {
+  const date = new Date().toLocaleString();
+
+  scans.push({ roll, emplacement, statut, date });
+
+  const tbody = document.querySelector("#tableScans tbody");
+  const tr = document.createElement("tr");
+
+  tr.innerHTML = `
+    <td>${roll}</td>
+    <td>${emplacement}</td>
+    <td>${statut}</td>
+    <td>${date}</td>
+  `;
+
+  tbody.appendChild(tr);
 }
 
 // ---------------------------
@@ -193,7 +205,7 @@ async function chargerHistorique() {
 }
 
 // ---------------------------
-// ADMIN : LISTE UTILISATEURS
+// ADMIN
 // ---------------------------
 async function chargerUtilisateurs() {
   const res = await fetch("/api/admin/listUsers");
@@ -217,9 +229,6 @@ async function chargerUtilisateurs() {
   });
 }
 
-// ---------------------------
-// ADMIN : AJOUT UTILISATEUR
-// ---------------------------
 document.getElementById("btnAddUser").addEventListener("click", async () => {
   const username = document.getElementById("newUser").value.trim();
   const password = document.getElementById("newPass").value.trim();
@@ -244,9 +253,6 @@ document.getElementById("btnAddUser").addEventListener("click", async () => {
   chargerUtilisateurs();
 });
 
-// ---------------------------
-// ADMIN : SUPPRESSION
-// ---------------------------
 async function deleteUser(id) {
   await fetch("/api/admin/deleteUser", {
     method: "POST",
@@ -257,9 +263,6 @@ async function deleteUser(id) {
   chargerUtilisateurs();
 }
 
-// ---------------------------
-// ADMIN : MODIFICATION MDP
-// ---------------------------
 async function updatePassword(id) {
   const newPass = document.getElementById("pass_" + id).value;
 
@@ -271,3 +274,7 @@ async function updatePassword(id) {
 
   chargerUtilisateurs();
 }
+
+document.getElementById("btnExportUsers").addEventListener("click", () => {
+  window.location.href = "/api/admin/exportUsers";
+});
