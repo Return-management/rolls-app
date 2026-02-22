@@ -356,43 +356,68 @@ async function chargerUtilisateurs() {
   const res = await fetch("/api/admin/listUsers");
   const data = await res.json();
 
-  let txt = "";
+  listeUsers.innerHTML = "";
+
   data.users.forEach((u) => {
     const masked = "*".repeat(u.password.length || 8);
-    txt += `ID: ${u.id} | ${u.username} | ${masked}\n`;
-  });
 
-  listeUsers.textContent = txt || "Aucun utilisateur.";
+    const div = document.createElement("div");
+    div.style.marginBottom = "10px";
+
+    div.innerHTML = `
+      <strong>${u.username}</strong> — ${masked}
+      <br>
+      <button onclick="modifierMotDePasse(${u.id}, '${u.username}')">Modifier</button>
+      <button onclick="supprimerUtilisateur(${u.id})" style="background:red;">Supprimer</button>
+      <hr>
+    `;
+
+    listeUsers.appendChild(div);
+  });
 }
 
 // ------------------------------------------------------------
-// PAGE ADMIN : AJOUT UTILISATEUR
+// PAGE ADMIN : SUPPRIMER UTILISATEUR
 // ------------------------------------------------------------
-btnAddUser.addEventListener("click", async () => {
-  const username = newUser.value.trim();
-  const password = newPass.value.trim();
+async function supprimerUtilisateur(id) {
+  if (!confirm("Supprimer cet utilisateur ?")) return;
 
-  if (!username || !password) {
-    adminInfo.textContent = "Saisir un utilisateur et un mot de passe.";
-    return;
-  }
-
-  const res = await fetch("/api/admin/addUser", {
+  const res = await fetch("/api/admin/deleteUser", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password })
+    body: JSON.stringify({ id })
   });
 
   const data = await res.json();
+
   if (data.success) {
-    adminInfo.textContent = "Utilisateur ajouté.";
-    newUser.value = "";
-    newPass.value = "";
     chargerUtilisateurs();
   } else {
-    adminInfo.textContent = "Erreur : " + (data.error || "inconnue");
+    alert("Erreur suppression");
   }
-});
+}
+
+// ------------------------------------------------------------
+// PAGE ADMIN : MODIFIER MOT DE PASSE
+// ------------------------------------------------------------
+async function modifierMotDePasse(id, username) {
+  const nouveau = prompt(`Nouveau mot de passe pour ${username} :`);
+  if (!nouveau) return;
+
+  const res = await fetch("/api/admin/updatePassword", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, password: nouveau })
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    chargerUtilisateurs();
+  } else {
+    alert("Erreur modification mot de passe");
+  }
+}
 
 // ------------------------------------------------------------
 // PAGE ADMIN : EXPORT USERS
