@@ -1,25 +1,99 @@
+/* Style général */
 body {
   font-family: Arial, sans-serif;
-  margin: 20px;
+  margin: 10px;
+  padding: 0;
+  background: #f7f7f7;
 }
 
+/* Logos */
 #header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 20px;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
 .logo {
   height: 60px;
+  max-width: 40%;
+}
+
+/* Menu */
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
 }
 
 .menu button {
-  margin-right: 10px;
+  flex: 1;
+  min-width: 120px;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: none;
+  background: #0078d4;
+  color: white;
 }
 
+/* Champs de saisie */
+input[type="text"],
+input[type="password"],
+select {
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Boutons */
+button {
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 6px;
+  border: none;
+  background: #0078d4;
+  color: white;
+  margin-top: 10px;
+  width: 100%;
+}
+
+/* Zones d'affichage */
 pre {
-  background: #f4f4f4;
-  padding: 10px;
+  background: white;
+  padding: 12px;
+  border-radius: 6px;
+  white-space: pre-wrap;
   max-height: 300px;
   overflow-y: auto;
+  border: 1px solid #ddd;
+}
+
+/* Titres */
+h2, h3 {
+  margin-top: 20px;
+}
+
+/* Responsive mobile */
+@media (max-width: 600px) {
+  body {
+    margin: 5px;
+  }
+
+  .menu button {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  input, select, button {
+    font-size: 16px;
+  }
+
+  .logo {
+    height: 45px;
+  }
 }
