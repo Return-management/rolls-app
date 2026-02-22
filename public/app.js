@@ -5,7 +5,7 @@ let userId = null;
 let isAdmin = false;
 let scans = [];
 
-// RÉFÉRENCES DOM MANQUANTES (ERREUR RÉSOLUE)
+// RÉFÉRENCES DOM
 const loginDiv = document.getElementById("login");
 const appDiv = document.getElementById("app");
 
@@ -68,12 +68,14 @@ function showEmplacements() {
   hideAllPages();
   pageEmplacements.style.display = "block";
   chargerEmplacements();
+  activerFiltresEmplacements();
 }
 
 function showHistorique() {
   hideAllPages();
   pageHistorique.style.display = "block";
   chargerHistorique();
+  activerFiltresHistorique();
 }
 
 function showAdmin() {
@@ -301,3 +303,80 @@ async function updatePassword(id) {
 document.getElementById("btnExportUsers").addEventListener("click", () => {
   window.location.href = "/api/admin/exportUsers";
 });
+
+// ---------------------------
+// 🔍 RECHERCHE AVANCÉE
+// ---------------------------
+function filtrerTableauAvance(options) {
+  const { tableId, rollIndex, statutIndex, emplacementIndex, searchId, statutId, emplacementId } = options;
+
+  const search = document.getElementById(searchId).value.toLowerCase();
+  const statut = document.getElementById(statutId).value.toLowerCase();
+  const emplacement = document.getElementById(emplacementId).value.toLowerCase();
+
+  const lignes = document.querySelectorAll(`#${tableId} tbody tr`);
+
+  lignes.forEach(tr => {
+    const rollVal = tr.children[rollIndex].textContent.toLowerCase();
+    const statutVal = tr.children[statutIndex].textContent.toLowerCase();
+    const emplacementVal = tr.children[emplacementIndex].textContent.toLowerCase();
+
+    const matchRoll = rollVal.includes(search);
+    const matchStatut = statut === "" || statutVal.includes(statut);
+    const matchEmpl = emplacement === "" || emplacementVal.includes(emplacement);
+
+    tr.style.display = (matchRoll && matchStatut && matchEmpl) ? "" : "none";
+  });
+}
+
+// ---------------------------
+// 🔍 FILTRES EMPLACEMENTS
+// ---------------------------
+function activerFiltresEmplacements() {
+  const options = {
+    tableId: "tableEmplacements",
+    rollIndex: 0,
+    statutIndex: 2,
+    emplacementIndex: 1,
+    searchId: "searchEmplacements",
+    statutId: "filterStatutEmpl",
+    emplacementId: "filterEmplacementEmpl"
+  };
+
+  document.getElementById("searchEmplacements").addEventListener("input", () => filtrerTableauAvance(options));
+  document.getElementById("filterStatutEmpl").addEventListener("change", () => filtrerTableauAvance(options));
+  document.getElementById("filterEmplacementEmpl").addEventListener("input", () => filtrerTableauAvance(options));
+
+  document.getElementById("clearSearchEmpl").addEventListener("click", () => {
+    document.getElementById("searchEmplacements").value = "";
+    document.getElementById("filterStatutEmpl").value = "";
+    document.getElementById("filterEmplacementEmpl").value = "";
+    filtrerTableauAvance(options);
+  });
+}
+
+// ---------------------------
+// 🔍 FILTRES HISTORIQUE
+// ---------------------------
+function activerFiltresHistorique() {
+  const options = {
+    tableId: "tableHistorique",
+    rollIndex: 1,
+    statutIndex: 3,
+    emplacementIndex: 2,
+    searchId: "searchHistorique",
+    statutId: "filterStatutHist",
+    emplacementId: "filterEmplacementHist"
+  };
+
+  document.getElementById("searchHistorique").addEventListener("input", () => filtrerTableauAvance(options));
+  document.getElementById("filterStatutHist").addEventListener("change", () => filtrerTableauAvance(options));
+  document.getElementById("filterEmplacementHist").addEventListener("input", () => filtrerTableauAvance(options));
+
+  document.getElementById("clearSearchHist").addEventListener("click", () => {
+    document.getElementById("searchHistorique").value = "";
+    document.getElementById("filterStatutHist").value = "";
+    document.getElementById("filterEmplacementHist").value = "";
+    filtrerTableauAvance(options);
+  });
+}
