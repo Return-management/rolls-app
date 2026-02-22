@@ -440,7 +440,7 @@ async function enregistrerEmplacement() {
 
     if (!confirmEmpty) return;
 
-    roll = "EMPTY-" + Date.now();
+    roll = "Libre";
     statut = ""; // Pas de statut si roll vide
   }
 
@@ -487,3 +487,4 @@ async function enregistrerEmplacement() {
     document.getElementById("panelStatut").value = "Arrivé";
   }
 }
+
