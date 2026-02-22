@@ -50,7 +50,7 @@ db.serialize(() => {
 
   db.run(
     "INSERT OR IGNORE INTO auth(username, password) VALUES (?, ?)",
-    ["admin", "admin"]
+    ["admin", "Process01"]
   );
 });
 
@@ -62,7 +62,6 @@ app.post("/api/login", (req, res) => {
     "SELECT id FROM auth WHERE username = ? AND password = ?",
     [username, password],
     (err, row) => {
-      if (err) return res.json({ success: false });
       if (!row) return res.json({ success: false });
       res.json({ success: true, userId: row.id });
     }
@@ -89,14 +88,13 @@ app.post("/api/scan", (req, res) => {
     } else {
       res.json({
         type: "new_roll",
-        roll_id: code,
-        message: "Nouveau roll"
+        roll_id: code
       });
     }
   });
 });
 
-// ASSIGNATION / DÉPLACEMENT
+// ASSIGNATION
 app.post("/api/assign", (req, res) => {
   const { roll_id, emplacement, statut, userId } = req.body;
 
@@ -124,7 +122,7 @@ app.get("/api/emplacements", (req, res) => {
   );
 });
 
-// RECHERCHE ROLL
+// RECHERCHE
 app.get("/api/recherche/:roll_id", (req, res) => {
   const roll_id = req.params.roll_id;
 
@@ -185,32 +183,46 @@ app.get("/api/export", (req, res) => {
   });
 });
 
-// ADMIN LOGIN
-app.post("/api/admin/login", (req, res) => {
-  const { username, password } = req.body;
-
-  db.get(
-    "SELECT * FROM auth WHERE username = ? AND password = ?",
-    [username, password],
-    (err, row) => {
-      if (!row) return res.json({ success: false });
-      res.json({ success: true });
-    }
-  );
+// ADMIN — LISTE UTILISATEURS
+app.get("/api/admin/listUsers", (req, res) => {
+  db.all("SELECT id, username, password FROM auth ORDER BY username ASC", [], (err, rows) => {
+    res.json({ users: rows });
+  });
 });
 
-// AJOUT UTILISATEUR
-app.post("/api/admin/addUser", (req, res) => {
-  const { username, password } = req.body;
+// ADMIN — EXPORT USERS
+app.get("/api/admin/exportUsers", (req, res) => {
+  db.all("SELECT username, password FROM auth ORDER BY username ASC", [], (err, rows) => {
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", "attachment; filename=utilisateurs.csv");
 
-  db.run(
-    "INSERT INTO auth(username, password) VALUES (?,?)",
-    [username, password],
-    (err) => {
-      if (err) return res.json({ success: false, error: "Utilisateur existant" });
-      res.json({ success: true });
-    }
-  );
+    let csv = "username;password\n";
+    rows.forEach((u) => {
+      csv += `${u.username};${u.password}\n`;
+    });
+
+    res.send(csv);
+  });
+});
+
+// ADMIN — SUPPRESSION
+app.post("/api/admin/deleteUser", (req, res) => {
+  const { id } = req.body;
+
+  db.run("DELETE FROM auth WHERE id = ?", [id], (err) => {
+    if (err) return res.json({ success: false });
+    res.json({ success: true });
+  });
+});
+
+// ADMIN — MODIFIER MOT DE PASSE
+app.post("/api/admin/updatePassword", (req, res) => {
+  const { id, password } = req.body;
+
+  db.run("UPDATE auth SET password = ? WHERE id = ?", [password, id], (err) => {
+    if (err) return res.json({ success: false });
+    res.json({ success: true });
+  });
 });
 
 app.listen(PORT, () => {
