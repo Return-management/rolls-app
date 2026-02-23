@@ -564,3 +564,12 @@ function fermerScanner() {
 }
 
 document.getElementById("closeScanner").addEventListener("click", fermerScanner);
+
+/* ============================================================
+   BOUTON ANNULER DANS LA FENÊTRE D’EMPLACEMENT
+============================================================ */
+document.getElementById("modalEmplCancel").addEventListener("click", () => {
+  const modal = document.getElementById("modalEmplacement");
+  modal.style.display = "none";
+});
+
