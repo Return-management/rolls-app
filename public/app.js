@@ -122,7 +122,7 @@ async function showEmplacements() {
 async function showHistorique() {
   hideAllPages();
   pageHistorique.style.display = "block";
-  await chargerUsersCache();   // IMPORTANT pour éviter "inconnu"
+  await chargerUsersCache();
   chargerHistorique();
   activerFiltresHistorique();
 }
@@ -141,6 +141,7 @@ document.getElementById("btnScanValidate").onclick = traiterScan;
 document.getElementById("scan").addEventListener("keydown", e => {
   if (e.key === "Enter") traiterScan();
 });
+
 /* ============================================================
    TRAITEMENT DU SCAN
 ============================================================ */
@@ -158,7 +159,6 @@ async function traiterScan() {
 
   lastRoll.textContent = code;
 
-  /* --- Si le roll existe déjà → afficher emplacement actuel + possibilité d'annuler --- */
   if (data.type === "existing_roll" && data.historique.length > 0) {
     const last = data.historique[data.historique.length - 1];
 
@@ -171,11 +171,10 @@ async function traiterScan() {
 
     if (!ok) {
       scan.value = "";
-      return; // ANNULATION PROPRE
+      return;
     }
   }
 
-  /* --- Ouvrir la fenêtre d’emplacement --- */
   const modal = document.getElementById("modalEmplacement");
   const inputEmpl = document.getElementById("modalEmplInput");
   const btnValider = document.getElementById("modalEmplValider");
@@ -210,7 +209,6 @@ async function assignerRoll(roll_id, emplacement) {
 
   let data = await res.json();
 
-  /* --- Emplacement déjà occupé → confirmation --- */
   if (data.conflict) {
     const ok = confirm(
       `⚠ L’emplacement "${emplacement}" est déjà occupé par le roll "${data.existingRoll}".\nVoulez-vous le remplacer ?`
@@ -317,6 +315,7 @@ async function chargerEmplacements() {
     tbody.appendChild(tr);
   });
 }
+
 /* ============================================================
    HISTORIQUE COMPLET
 ============================================================ */
@@ -336,7 +335,7 @@ async function chargerHistorique() {
       h.utilisateur ??
       null;
 
-   const username = currentUser.textContent;
+    const username = usersCache[userIdHist] || "(inconnu)";
 
     const tr = document.createElement("tr");
 
@@ -531,7 +530,7 @@ function exporterEmplacements() {
 }
 
 /* ============================================================
-   SCANNER ZXING — TOUJOURS DEVANT
+   SCANNER ZXING — VALIDATION AUTOMATIQUE
 ============================================================ */
 async function lancerScanner(targetInputId) {
 
@@ -553,24 +552,24 @@ async function lancerScanner(targetInputId) {
 
     codeReader.decodeFromVideoDevice(null, "scannerVideo", (result, err) => {
       if (result) {
-    fermerScanner();
+        fermerScanner();
 
-    const input = document.getElementById(targetInputId);
-    if (input) input.value = result.text;
+        const input = document.getElementById(targetInputId);
+        if (input) input.value = result.text;
 
-    // Validation automatique du roll
-    if (targetInputId === "scan") {
-        traiterScan();
-    }
+        // Validation automatique du roll
+        if (targetInputId === "scan") {
+          traiterScan();
+        }
 
-    // Validation automatique de l’emplacement
-    if (targetInputId === "modalEmplInput") {
-        document.getElementById("modalEmplValider").click();
-    }
+        // Validation automatique de l’emplacement
+        if (targetInputId === "modalEmplInput") {
+          document.getElementById("modalEmplValider").click();
+        }
 
-    if (wasModalOpen) modalEmpl.style.display = "flex";
-}
-       }  
+        if (wasModalOpen) modalEmpl.style.display = "flex";
+      }
+    });
 
   } catch (err) {
     alert("Impossible d'accéder à la caméra.");
@@ -596,8 +595,3 @@ document.getElementById("closeScanner").addEventListener("click", fermerScanner)
 document.getElementById("modalEmplCancel").addEventListener("click", () => {
   document.getElementById("modalEmplacement").style.display = "none";
 });
-
-
-
-
-
