@@ -553,24 +553,23 @@ async function lancerScanner(targetInputId) {
 
     codeReader.decodeFromVideoDevice(null, "scannerVideo", (result, err) => {
       if (result) {
-        fermerScanner();
-
-        const input = document.getElementById(targetInputId);
-        if (input) input.value = result.text;
-
-        if (wasModalOpen) modalEmpl.style.display = "flex";if (result) {
     fermerScanner();
 
     const input = document.getElementById(targetInputId);
     if (input) input.value = result.text;
 
-    // Validation automatique si on scanne dans le champ principal
+    // Validation automatique du roll
     if (targetInputId === "scan") {
         traiterScan();
     }
 
+    // Validation automatique de l’emplacement
+    if (targetInputId === "modalEmplInput") {
+        document.getElementById("modalEmplValider").click();
+    }
+
     if (wasModalOpen) modalEmpl.style.display = "flex";
-      }
+}
        }  
     });
 
@@ -598,6 +597,7 @@ document.getElementById("closeScanner").addEventListener("click", fermerScanner)
 document.getElementById("modalEmplCancel").addEventListener("click", () => {
   document.getElementById("modalEmplacement").style.display = "none";
 });
+
 
 
 
