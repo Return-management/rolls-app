@@ -558,7 +558,18 @@ async function lancerScanner(targetInputId) {
         const input = document.getElementById(targetInputId);
         if (input) input.value = result.text;
 
-        if (wasModalOpen) modalEmpl.style.display = "flex";
+        if (wasModalOpen) modalEmpl.style.display = "flex";if (result) {
+    fermerScanner();
+
+    const input = document.getElementById(targetInputId);
+    if (input) input.value = result.text;
+
+    // Validation automatique si on scanne dans le champ principal
+    if (targetInputId === "scan") {
+        traiterScan();
+    }
+
+    if (wasModalOpen) modalEmpl.style.display = "flex";
       }
     });
 
@@ -586,4 +597,5 @@ document.getElementById("closeScanner").addEventListener("click", fermerScanner)
 document.getElementById("modalEmplCancel").addEventListener("click", () => {
   document.getElementById("modalEmplacement").style.display = "none";
 });
+
 
