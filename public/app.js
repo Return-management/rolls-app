@@ -565,7 +565,7 @@ async function lancerScanner(targetInputId) {
         // Validation automatique de l’emplacement
        if (targetInputId === "modalEmplInput") {
     document.getElementById("modalEmplValider").click();
-    document.getElementById("modalEmplacement").style.display = "none"; // fermeture automatique
+   document.getElementById("modalEmplCancel").click();
 }
 
 
@@ -597,4 +597,5 @@ document.getElementById("closeScanner").addEventListener("click", fermerScanner)
 document.getElementById("modalEmplCancel").addEventListener("click", () => {
   document.getElementById("modalEmplacement").style.display = "none";
 });
+
 
