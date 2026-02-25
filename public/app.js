@@ -335,7 +335,7 @@ async function chargerHistorique() {
       h.utilisateur ??
       null;
 
-    const username = usersCache[userIdHist] || "(inconnu)";
+    const username = currentUser.textContent;
 
     const tr = document.createElement("tr");
 
@@ -597,5 +597,6 @@ document.getElementById("closeScanner").addEventListener("click", fermerScanner)
 document.getElementById("modalEmplCancel").addEventListener("click", () => {
   document.getElementById("modalEmplacement").style.display = "none";
 });
+
 
 
