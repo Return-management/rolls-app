@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-const db = new sqlite3.Database("/data/database.db");
+const db = new sqlite3.Database("/data/rolls.db");
 
 // ------------------------------------------------------------
 // INITIALISATION DES TABLES
@@ -201,4 +201,5 @@ app.get("/api/historique", (req, res) => {
 
 // ------------------------------------------------------------
 app.listen(PORT, () => console.log("Serveur démarré sur le port " + PORT));
+
 
