@@ -188,8 +188,6 @@ async function traiterScan() {
     modal.style.display = "none";
     await assignerRoll(code, emplacement);
   };
-
-  scan.value = "";
 }
 
 /* ============================================================
@@ -272,7 +270,15 @@ function remplirTableauHistoriqueScan(historique) {
   tbody.innerHTML = "";
 
   historique.forEach(h => {
-    const username = usersCache[h.user_id] || "(inconnu)";
+    const userIdHist =
+      h.user_id ??
+      h.userId ??
+      h.user ??
+      h.utilisateur ??
+      null;
+
+    const username = usersCache[userIdHist] || "(inconnu)";
+
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
@@ -321,31 +327,30 @@ async function chargerHistorique() {
   const tbody = tableHistorique.querySelector("tbody");
   tbody.innerHTML = "";
 
-data.historique.forEach(h => {
+  data.historique.forEach(h => {
 
-  const userIdHist =
+    const userIdHist =
       h.user_id ??
       h.userId ??
       h.user ??
       h.utilisateur ??
       null;
 
-  const username = usersCache[userIdHist] || "(inconnu)";
+    const username = usersCache[userIdHist] || "(inconnu)";
 
-  const tr = document.createElement("tr");
+    const tr = document.createElement("tr");
 
-  tr.innerHTML = `
-    <td>${h.date}</td>
-    <td>${h.roll_id}</td>
-    <td>${h.emplacement}</td>
-    <td>${h.statut}</td>
-    <td>${username}</td>
-    <td>${h.action}</td>
-  `;
+    tr.innerHTML = `
+      <td>${h.date}</td>
+      <td>${h.roll_id}</td>
+      <td>${h.emplacement}</td>
+      <td>${h.statut}</td>
+      <td>${username}</td>
+      <td>${h.action}</td>
+    `;
 
-  tbody.appendChild(tr);
-});
-
+    tbody.appendChild(tr);
+  });
 }
 
 /* ============================================================
@@ -579,8 +584,5 @@ document.getElementById("closeScanner").addEventListener("click", fermerScanner)
    BOUTON ANNULER DANS LA FENÊTRE D’EMPLACEMENT
 ============================================================ */
 document.getElementById("modalEmplCancel").addEventListener("click", () => {
-  const modal = document.getElementById("modalEmplacement");
-  modal.style.display = "none";
+  document.getElementById("modalEmplacement").style.display = "none";
 });
-
-
