@@ -571,6 +571,7 @@ async function lancerScanner(targetInputId) {
 
     if (wasModalOpen) modalEmpl.style.display = "flex";
       }
+       }  
     });
 
   } catch (err) {
@@ -597,5 +598,6 @@ document.getElementById("closeScanner").addEventListener("click", fermerScanner)
 document.getElementById("modalEmplCancel").addEventListener("click", () => {
   document.getElementById("modalEmplacement").style.display = "none";
 });
+
 
 
