@@ -321,21 +321,31 @@ async function chargerHistorique() {
   const tbody = tableHistorique.querySelector("tbody");
   tbody.innerHTML = "";
 
-  data.historique.forEach(h => {
-    const username = usersCache[h.user_id] || "(inconnu)";
-    const tr = document.createElement("tr");
+data.historique.forEach(h => {
 
-    tr.innerHTML = `
-      <td>${h.date}</td>
-      <td>${h.roll_id}</td>
-      <td>${h.emplacement}</td>
-      <td>${h.statut}</td>
-      <td>${username}</td>
-      <td>${h.action}</td>
-    `;
+  const userIdHist =
+      h.user_id ??
+      h.userId ??
+      h.user ??
+      h.utilisateur ??
+      null;
 
-    tbody.appendChild(tr);
-  });
+  const username = usersCache[userIdHist] || "(inconnu)";
+
+  const tr = document.createElement("tr");
+
+  tr.innerHTML = `
+    <td>${h.date}</td>
+    <td>${h.roll_id}</td>
+    <td>${h.emplacement}</td>
+    <td>${h.statut}</td>
+    <td>${username}</td>
+    <td>${h.action}</td>
+  `;
+
+  tbody.appendChild(tr);
+});
+
 }
 
 /* ============================================================
@@ -572,4 +582,5 @@ document.getElementById("modalEmplCancel").addEventListener("click", () => {
   const modal = document.getElementById("modalEmplacement");
   modal.style.display = "none";
 });
+
 
