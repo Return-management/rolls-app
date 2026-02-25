@@ -1,12 +1,12 @@
 /* ------------------------------
-   STYLE GLOBAL
+   STYLE GLOBAL — DARK MODE
 ------------------------------ */
 body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
-  background: #f2f4f7;
-  color: #333;
+  background: #121212;
+  color: #e0e0e0;
 }
 
 /* ------------------------------
@@ -16,7 +16,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #1e88e5;
+  background: #0d47a1;
   padding: 10px 20px;
   color: white;
 }
@@ -36,7 +36,7 @@ body {
    BOUTON DECONNEXION
 ------------------------------ */
 .logoutBtn {
-  background: #e53935;
+  background: #c62828;
   color: white;
   border: none;
   padding: 10px 18px;
@@ -47,7 +47,7 @@ body {
 }
 
 .logoutBtn:hover {
-  background: #c62828;
+  background: #b71c1c;
 }
 
 /* ------------------------------
@@ -63,7 +63,7 @@ body {
    BOUTONS
 ------------------------------ */
 button {
-  background: #1e88e5;
+  background: #1565c0;
   color: white;
   border: none;
   padding: 10px 18px;
@@ -74,7 +74,7 @@ button {
 }
 
 button:hover {
-  background: #1565c0;
+  background: #0d47a1;
 }
 
 button:active {
@@ -88,9 +88,11 @@ input, select {
   width: 100%;
   padding: 10px;
   margin: 6px 0 12px;
-  border: 1px solid #ccc;
+  border: 1px solid #555;
   border-radius: 6px;
   font-size: 15px;
+  background: #1e1e1e;
+  color: #e0e0e0;
 }
 
 /* ------------------------------
@@ -111,11 +113,11 @@ input, select {
    CARTES / BLOCS
 ------------------------------ */
 .bloc {
-  background: white;
+  background: #1e1e1e;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
 }
 
 /* ------------------------------
@@ -125,7 +127,7 @@ input, select {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #f7f9fc;
+  background: #2a2a2a;
   padding: 10px;
   border-radius: 6px;
   margin-bottom: 8px;
@@ -139,11 +141,12 @@ input, select {
    PRE (AFFICHAGE TEXTE)
 ------------------------------ */
 pre {
-  background: #f7f9fc;
+  background: #2a2a2a;
   padding: 12px;
   border-radius: 6px;
   overflow-x: auto;
-  border: 1px solid #ddd;
+  border: 1px solid #444;
+  color: #e0e0e0;
 }
 
 /* ------------------------------
@@ -173,7 +176,7 @@ pre {
 }
 
 .scanBtn {
-  background: #1e88e5;
+  background: #1976d2;
   color: white;
   border: none;
   padding: 10px 14px;
@@ -182,7 +185,7 @@ pre {
 }
 
 .validateBtn {
-  background: #43a047;
+  background: #2e7d32;
   color: white;
   padding: 10px 14px;
   border-radius: 6px;
@@ -196,17 +199,23 @@ pre {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
+  background: #1e1e1e;
 }
 
 .table th,
 .table td {
-  border: 1px solid #ddd;
+  border: 1px solid #444;
   padding: 6px 8px;
   font-size: 14px;
 }
 
 .table th {
-  background: #e3f2fd;
+  background: #263238;
+  color: #e0e0e0;
+}
+
+.table tr:nth-child(even) {
+  background: #242424;
 }
 
 /* ------------------------------
@@ -240,7 +249,7 @@ pre {
 
 #closeScanner {
   margin-top: 10px;
-  background: #e53935;
+  background: #c62828;
 }
 
 /* ------------------------------
@@ -260,9 +269,10 @@ pre {
 }
 
 #modalBox {
-  background: white;
+  background: #1e1e1e;
   padding: 20px;
   border-radius: 10px;
   width: 300px;
   text-align: center;
+  border: 1px solid #444;
 }
