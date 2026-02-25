@@ -563,9 +563,11 @@ async function lancerScanner(targetInputId) {
         }
 
         // Validation automatique de l’emplacement
-        if (targetInputId === "modalEmplInput") {
-          document.getElementById("modalEmplValider").click();
-        }
+       if (targetInputId === "modalEmplInput") {
+    document.getElementById("modalEmplValider").click();
+    document.getElementById("modalEmplacement").style.display = "none"; // fermeture automatique
+}
+
 
         if (wasModalOpen) modalEmpl.style.display = "flex";
       }
@@ -595,3 +597,4 @@ document.getElementById("closeScanner").addEventListener("click", fermerScanner)
 document.getElementById("modalEmplCancel").addEventListener("click", () => {
   document.getElementById("modalEmplacement").style.display = "none";
 });
+
